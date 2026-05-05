@@ -3,7 +3,7 @@
 // ========================================
 
 import logger from '../logger.js';
-import { safeStringify } from '../events/utils/SafeStringify.js';
+import { safeStringify } from '../utils/SafeStringify.js';
 
 /**
  * Traiter une interaction de bouton

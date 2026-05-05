@@ -187,13 +187,8 @@ async function handleButton (interaction) {
     }
 
     // Bouton non reconnu
-    logger.warn(`Bouton non reconnu: ${customId}`);
-    await interaction.reply({
-      content: '❌ Cette action n\'est plus disponible.',
-      ephemeral: true
-    });
-
-    return { success: true, message: 'BUTTON_HANDLED' };
+    const { handleButtonInteraction } = await import('./ButtonHandler.js');
+    return await handleButtonInteraction(interaction);
   } catch (error) {
     logger.error(`Erreur lors du traitement du bouton ${customId}:`, error);
     return {
