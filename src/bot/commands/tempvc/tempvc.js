@@ -3,7 +3,7 @@ import { sendTempVcPanel } from '../../services/tempVcService.js';
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('tempvc')
+    .setName('adminvc')
     .setDescription('Ouvrir le panel de gestion de ton salon temporaire')
     .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.Connect),
