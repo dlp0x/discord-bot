@@ -282,7 +282,7 @@ async function handleInteractionResponse (interaction, result, commandName) {
 
       // Import dynamique des handlers spéciaux
       const { handleSpecialCommands } = await import(
-        './handlers/SpecialCommandHandler.js'
+        '../handlers/SpecialCommandHandler.js'
       );
       await handleSpecialCommands(interaction, result, commandName);
     } else {
