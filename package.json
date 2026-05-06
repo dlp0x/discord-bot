@@ -51,7 +51,7 @@
     "dotenv": "^17.2.1",
     "eslint": "^9.32.0",
     "express": "^5.1.0",
-    "express-rate-limit": "^8.0.2",
+    "express-rate-limit": "^8.5.1",
     "fast-glob": "^3.3.3",
     "ffmpeg": "^0.0.4",
     "helmet": "^8.1.0",
