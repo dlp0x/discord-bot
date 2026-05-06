@@ -115,10 +115,6 @@ async function handlePlayCommand (interaction) {
     interaction.client.audio = { connection, player };
     logger.info('💾 Audio sauvegardé dans client.audio');
 
-    // 🎭 Enregistrer le stage pour surveillance automatique
-    stageMonitor.registerStage(channel.guild.id, channel.id, channel.guild);
-    logger.info('🎭 Stage enregistré pour surveillance automatique');
-
     // 🔁 Sécurité si le stream prend trop de temps
     const timeout = setTimeout(() => {
       logger.warn('⏰ Timeout de 5s atteint');
@@ -126,57 +122,13 @@ async function handlePlayCommand (interaction) {
     }, 5000);
 
     player.once(AudioPlayerStatus.Playing, async () => {
-      logger.info('🎵 Événement Playing détecté');
       clearTimeout(timeout);
-
-      // 🎤 Tentative d'auto-promotion en speaker
-      try {
-        const promotionResult = await stageSpeakerManager.promoteToSpeaker(connection, channel);
-
-        if (promotionResult.success) {
-          await interaction.editReply('▶️ Stream lancé dans le stage channel. 🎤 Bot promu en speaker automatiquement.');
-          logger.success('🎤 Auto-promotion en speaker réussie');
-        } else {
-          const missingPerms = stageSpeakerManager.formatMissingPermissions(promotionResult.missingPermissions || []);
-          const errorMessage = missingPerms.length > 0
-            ? `Permissions manquantes: ${missingPerms.join(', ')}`
-            : '';
-          await interaction.editReply(
-            '▶️ Stream lancé dans le stage channel.\n⚠️ Auto-promotion en speaker échouée: '
-            + `${promotionResult.message}\n${errorMessage}`
-          );
-          logger.warn('🎤 Auto-promotion en speaker échouée:', promotionResult.message);
-        }
-      } catch (promotionError) {
-        await interaction.editReply(
-          '▶️ Stream lancé dans le stage channel.\n⚠️ Erreur lors de l\'auto-promotion en speaker.'
-        );
-        logger.error('🎤 Erreur lors de l\'auto-promotion:', promotionError);
-      }
-
-      logger.success(' Message de succès envoyé');
+      await interaction.editReply('▶️ Stream lancé dans le stage channel.');
+      logger.success('🎤 Message de succès envoyé');
     });
-
-    player.on('error', async (error) => {
-      logger.error('❌ Erreur du player:', {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
-        streamUrl: STREAM_URL
-      });
-      clearTimeout(timeout);
-      return await interaction.editReply(
-        `❌ Erreur pendant la lecture du stream: ${error.message}`
-      );
-    });
-
-    logger.success(' handlePlayCommand terminé avec succès');
   } catch (error) {
-    logger.error('❌ Erreur lors du traitement de la commande play:', error);
-    // L'interaction est déjà différée par le code principal, donc on utilise editReply
-    await interaction.editReply({
-      content: '❌ Erreur lors de l\'exécution de la commande play.'
-    });
+    logger.error('❌ Erreur dans handlePlayCommand:', error);
+    await interaction.editReply(`❌ Erreur: ${error.message}`);
   }
 }
 

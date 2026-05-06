@@ -20,7 +20,6 @@ const COMPACT_LOGS = process.env.COMPACT_LOGS === 'true';
 import { validateInteractionInput } from '../handlers/ValidationHandler.js';
 import { handleInteractionByType } from '../handlers/InteractionHandler.js';
 import { getCommandType } from '../handlers/CommandTypeHandler.js';
-// import { safeStringify } from './utils/SafeStringify.js';
 
 // Instance de RetryManager pour les interactions Discord
 const interactionRetryManager = new RetryManager({
@@ -224,7 +223,6 @@ async function executeWithRetry (
           db,
           discordConfig
         );
-        // logger.debug(`Résultat de l'interaction: ${safeStringify(result)}`);
         return result;
       },
       {
@@ -236,17 +234,14 @@ async function executeWithRetry (
   } catch (error) {
     logger.error(`Erreur dans RetryManager.execute: ${error.message}`, error);
 
-    // Vérifier si l'interaction a déjà été répondue avant d'essayer de répondre
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
-        content:
-          '❌ Une erreur est survenue lors du traitement de votre demande.',
+        content: '❌ Une erreur est survenue lors du traitement de votre demande.',
         ephemeral: true
       });
     } else if (interaction.deferred) {
       await interaction.editReply({
-        content:
-          '❌ Une erreur est survenue lors du traitement de votre demande.'
+        content: '❌ Une erreur est survenue lors du traitement de votre demande.'
       });
     }
 
@@ -258,60 +253,51 @@ async function executeWithRetry (
  * Gère la réponse à l'interaction
  */
 async function handleInteractionResponse (interaction, result, commandName) {
-  // logger.debug(`Résultat final après RetryManager: ${safeStringify(result)}`);
-
   if (result && result.success) {
     logger.info(
       `Résultat de commande: ${result.message}, deferReply: ${result.deferReply}`
     );
 
-    // Pour les boutons, on ne fait rien car ils sont déjà traités
-    if (result.message === 'BUTTON_HANDLED') {
-      logger.info('Bouton traité avec succès');
+    // Pour les boutons et modals déjà traités, on ne fait rien
+    if (result.message === 'BUTTON_HANDLED' || result.message === 'MODAL_HANDLED') {
+      logger.info('Interaction déjà traitée par son handler');
       return;
     }
 
     // Gestion spéciale pour les commandes qui nécessitent deferReply
     if (result.deferReply) {
-      logger.debug(
-        'Commande nécessite deferReply, appel de interaction.deferReply()'
-      );
+      logger.debug('Commande nécessite deferReply, appel de interaction.deferReply()');
       if (!interaction.deferred) {
         await interaction.deferReply();
       }
 
-      // Import dynamique des handlers spéciaux
-      const { handleSpecialCommands } = await import(
-        '../handlers/SpecialCommandHandler.js'
-      );
+      const { handleSpecialCommands } = await import('../handlers/SpecialCommandHandler.js');
       await handleSpecialCommands(interaction, result, commandName);
-    } else {
-      // Éviter les doubles réponses si la commande a déjà répondu
-      if (interaction.replied || interaction.deferred) {
-        logger.debug(
-          'Interaction déjà répondue/différée; saut de la réponse automatique'
-        );
-        return;
-      }
-      logger.debug('Réponse normale avec interaction.reply()');
-      await interaction.reply({
-        content: result.message,
-        embeds: result.embeds,
-        components: result.components,
-        ephemeral: result.ephemeral !== false
-      });
+      return; // ← important : ne pas tomber dans le else après
     }
+
+    // Éviter les doubles réponses si la commande a déjà répondu elle-même
+    if (interaction.replied || interaction.deferred) {
+      logger.debug('Interaction déjà répondue/différée; saut de la réponse automatique');
+      return;
+    }
+
+    logger.debug('Réponse normale avec interaction.reply()');
+    await interaction.reply({
+      content: result.message,
+      embeds: result.embeds,
+      components: result.components,
+      ephemeral: result.ephemeral !== false
+    });
   } else {
     logger.warn('Résultat de commande échoué ou null');
     if (interaction.replied || interaction.deferred) {
       await interaction.editReply({
-        content:
-          '❌ Une erreur est survenue lors du traitement de votre demande.'
+        content: '❌ Une erreur est survenue lors du traitement de votre demande.'
       });
     } else {
       await interaction.reply({
-        content:
-          '❌ Une erreur est survenue lors du traitement de votre demande.',
+        content: '❌ Une erreur est survenue lors du traitement de votre demande.',
         ephemeral: true
       });
     }
@@ -324,7 +310,6 @@ async function handleInteractionResponse (interaction, result, commandName) {
 async function handleInteractionError (interaction, error, startTime) {
   const duration = Date.now() - startTime;
 
-  // Log d'erreur sécurisé
   secureLogger.secureError('Erreur lors du traitement d\'interaction', error, {
     userId: interaction?.user?.id,
     commandName: interaction?.commandName || interaction?.customId,
@@ -332,7 +317,6 @@ async function handleInteractionError (interaction, error, startTime) {
     duration: `${duration}ms`
   });
 
-  // Réponse d'erreur à l'utilisateur
   try {
     const errorMessage
       = interaction.replied || interaction.deferred
@@ -350,11 +334,7 @@ async function handleInteractionError (interaction, error, startTime) {
       });
     }
   } catch (replyError) {
-    // Log spécifique pour l'erreur InteractionAlreadyReplied
-    if (
-      replyError.message
-      && replyError.message.includes('InteractionAlreadyReplied')
-    ) {
+    if (replyError.message && replyError.message.includes('InteractionAlreadyReplied')) {
       logger.error('🚨 ERREUR InteractionAlreadyReplied détectée:', {
         error: replyError.message,
         interactionState: {
