@@ -13,7 +13,7 @@ Only the latest major version is officially supported for security updates.
 
 If you discover a security vulnerability in this project, **please do not open a public issue**. Instead, report it privately by emailing:
 
-- **security@soundshineradio.com** (or replace with your preferred contact email)
+- **security@soundshineradio.com**
 
 Please include as much detail as possible:
 - Steps to reproduce the vulnerability
