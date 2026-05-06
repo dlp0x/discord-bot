@@ -74,8 +74,8 @@
     "vitest": "^3.2.4"
   },
   "scripts": {
-    "dev": "dotenv -e .env.dev -- nodemon src/index.js",
-    "prod": "dotenv -e .env.prod -- node src/index.js",
+    "start:dev": "dotenv -e .env.dev -- nodemon src/index.js",
+    "start:prod": "dotenv -e .env.prod -- node src/index.js",
     "deploy:dev": "dotenv -e .env.dev -- node scripts/bot/deploy-commands.js --dev",
     "clear:dev": "dotenv -e .env.dev -- node scripts/bot/deploy-commands.js --dev --clear",
     "clear:global": "dotenv -e .env.prod -- node scripts/bot/deploy-commands.js --global --clear",

@@ -67,7 +67,7 @@ async function runGitActions () {
     'src/index.js',
     'src/config/eslint.config.js',
     'src/config/vitest.config.js',
-    '.github/workflows/ci-cd.yml'
+    '.github/workflows/ci.yml'
   ];
 
   for (const file of essentialFiles) {
