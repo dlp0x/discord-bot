@@ -13,7 +13,7 @@ class StageSpeakerManager {
       PermissionFlagsBits.RequestToSpeak
     ];
 
-    logger.info('StageSpeakerManager initialisÃ©');
+    logger.info('StageSpeakerManager initialisé');
   }
 
   /**
@@ -23,13 +23,13 @@ class StageSpeakerManager {
     try {
       const botMember = guild.members.me;
       if (!botMember) {
-        logger.error('ðŸŽ¤ Bot member introuvable dans le guild');
+        logger.error('Bot member introuvable dans le guild');
         return { hasPermissions: false, missingPermissions: this.requiredPermissions };
       }
 
       const channelPermissions = channel.permissionsFor(botMember);
       if (!channelPermissions) {
-        logger.error('ðŸŽ¤ Impossible de rÃ©cupÃ©rer les permissions du canal');
+        logger.error('Impossible de récupérer les permissions du canal');
         return { hasPermissions: false, missingPermissions: this.requiredPermissions };
       }
 
@@ -38,7 +38,7 @@ class StageSpeakerManager {
 
       const hasPermissions = missingPermissions.length === 0;
 
-      logger.debug('ðŸŽ¤ VÃ©rification des permissions:', {
+      logger.debug('Vérification des permissions:', {
         hasPermissions,
         missingPermissions: missingPermissions.map(p => PermissionFlagsBits[p]),
         channelId: channel.id,
@@ -47,7 +47,7 @@ class StageSpeakerManager {
 
       return { hasPermissions, missingPermissions };
     } catch (error) {
-      logger.error('ðŸŽ¤ Erreur lors de la vÃ©rification des permissions:', error);
+      logger.error('Erreur lors de la vérification des permissions:', error);
       return { hasPermissions: false, missingPermissions: this.requiredPermissions };
     }
   }
@@ -65,7 +65,7 @@ class StageSpeakerManager {
 
       if (!hasPermissions) {
         const missingNames = missingPermissions.map(p => PermissionFlagsBits[p]).join(', ');
-        logger.warn(`ðŸŽ¤ Permissions manquantes pour l'auto-promotion: ${missingNames}`);
+        logger.warn(`Permissions manquantes pour l'auto-promotion: ${missingNames}`);
         return {
           success: false,
           error: 'INSUFFICIENT_PERMISSIONS',
@@ -74,7 +74,7 @@ class StageSpeakerManager {
         };
       }
 
-      logger.info('ðŸŽ¤ Tentative de promotion du bot en speaker...');
+      logger.info('Tentative de promotion du bot en speaker...');
 
       const botMember = channel.guild.members.me;
       if (!botMember?.voice?.channelId) {
@@ -83,11 +83,11 @@ class StageSpeakerManager {
 
       await botMember.voice.setSuppressed(false);
 
-      logger.success('ðŸŽ¤ Bot promu en speaker avec succÃ¨s');
+      logger.success('Bot promu en speaker avec succès');
 
       return {
         success: true,
-        message: 'Bot promu en speaker avec succÃ¨s'
+        message: 'Bot promu en speaker avec succès'
       };
     } catch (error) {
       let errorType = 'UNKNOWN_ERROR';
@@ -99,16 +99,16 @@ class StageSpeakerManager {
         || (error.name === 'DiscordAPIError' && error.message.includes('permissions'))
       ) {
         errorType = 'INSUFFICIENT_PERMISSIONS';
-        userMessage = 'Le bot n\'est pas Stage Moderator (permission "GÃ©rer le canal" manquante dans le stage)';
+        userMessage = 'Le bot n\'est pas Stage Moderator (permission "Gérer le canal" manquante dans le stage)';
       } else if (error.code === 50001) {
         errorType = 'MISSING_ACCESS';
-        userMessage = 'AccÃ¨s manquant au canal vocal';
+        userMessage = 'Accès manquant au canal vocal';
       } else if (error.message.includes('suppressed')) {
         errorType = 'SUPPRESSION_ERROR';
         userMessage = 'Erreur lors de la modification du statut de suppression';
       }
 
-      logger.error('ðŸŽ¤ Erreur lors de la promotion en speaker:', error);
+      logger.error('Erreur lors de la promotion en speaker:', error);
 
       return {
         success: false,
@@ -145,7 +145,7 @@ class StageSpeakerManager {
         channelId: botMember.voice.channelId
       };
     } catch (error) {
-      logger.error('ðŸŽ¤ Erreur lors de la vÃ©rification du statut du stage:', error);
+      logger.error('Erreur lors de la vÃ©rification du statut du stage:', error);
       return {
         isConnected: false,
         isSpeaker: false,

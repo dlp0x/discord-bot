@@ -4,8 +4,6 @@
 
 import logger from '../logger.js';
 import stageMonitor from '../../core/services/StageMonitor.js';
-import stageSpeakerManager from '../../core/services/StageSpeakerManager.js';
-
 /**
  * Gérer les commandes spéciales qui nécessitent deferReply
  */
@@ -115,20 +113,36 @@ async function handlePlayCommand (interaction) {
     interaction.client.audio = { connection, player };
     logger.info('💾 Audio sauvegardé dans client.audio');
 
+    // 🎭 Enregistrer le stage pour surveillance automatique
+    stageMonitor.registerStage(channel.guild.id, channel.id, channel.guild);
+    logger.info('🎭 Stage enregistré pour surveillance automatique');
+
     // 🔁 Sécurité si le stream prend trop de temps
     const timeout = setTimeout(() => {
       logger.warn('⏰ Timeout de 5s atteint');
       interaction.editReply('⚠️ Aucun son détecté après 5s. Lecture échouée ?');
     }, 5000);
 
-    player.once(AudioPlayerStatus.Playing, async () => {
+    player.on('error', async (error) => {
+      logger.error('❌ Erreur du player:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+        streamUrl: STREAM_URL
+      });
       clearTimeout(timeout);
-      await interaction.editReply('▶️ Stream lancé dans le stage channel.');
-      logger.success('🎤 Message de succès envoyé');
+      return await interaction.editReply(
+        `❌ Erreur pendant la lecture du stream: ${error.message}`
+      );
     });
+
+    logger.success(' handlePlayCommand terminé avec succès');
   } catch (error) {
-    logger.error('❌ Erreur dans handlePlayCommand:', error);
-    await interaction.editReply(`❌ Erreur: ${error.message}`);
+    logger.error('❌ Erreur lors du traitement de la commande play:', error);
+    // L'interaction est déjà différée par le code principal, donc on utilise editReply
+    await interaction.editReply({
+      content: '❌ Erreur lors de l\'exécution de la commande play.'
+    });
   }
 }
 
