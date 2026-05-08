@@ -74,8 +74,6 @@ class StageSpeakerManager {
         };
       }
 
-      logger.info('Tentative de promotion du bot en speaker...');
-
       const botMember = channel.guild.members.me;
       if (!botMember?.voice?.channelId) {
         throw new Error('Bot not connected to voice');
@@ -83,7 +81,7 @@ class StageSpeakerManager {
 
       await botMember.voice.setSuppressed(false);
 
-      logger.success('Bot promu en speaker avec succès');
+      
 
       return {
         success: true,

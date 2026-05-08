@@ -4,6 +4,8 @@
 
 import logger from '../logger.js';
 import stageMonitor from '../../core/services/StageMonitor.js';
+import stageSpeakerManager from '../../core/services/StageSpeakerManager.js';
+
 /**
  * Gérer les commandes spéciales qui nécessitent deferReply
  */
@@ -122,6 +124,38 @@ async function handlePlayCommand (interaction) {
       logger.warn('⏰ Timeout de 5s atteint');
       interaction.editReply('⚠️ Aucun son détecté après 5s. Lecture échouée ?');
     }, 5000);
+
+    player.once(AudioPlayerStatus.Playing, async () => {
+      logger.info('🎵 Événement Playing détecté');
+      clearTimeout(timeout);
+
+      // 🎤 Tentative d'auto-promotion en speaker
+      try {
+        const promotionResult = await stageSpeakerManager.promoteToSpeaker(connection, channel);
+
+        if (promotionResult.success) {
+          await interaction.editReply('▶️ Stream lancé dans le stage channel. 🎤 Bot promu en speaker automatiquement.');
+          logger.success('🎤 Auto-promotion en speaker réussie');
+        } else {
+          const missingPerms = stageSpeakerManager.formatMissingPermissions(promotionResult.missingPermissions || []);
+          const errorMessage = missingPerms.length > 0
+            ? `Permissions manquantes: ${missingPerms.join(', ')}`
+            : '';
+          await interaction.editReply(
+            '▶️ Stream lancé dans le stage channel.\n⚠️ Auto-promotion en speaker échouée: '
+            + `${promotionResult.message}\n${errorMessage}`
+          );
+          logger.warn('🎤 Auto-promotion en speaker échouée:', promotionResult.message);
+        }
+      } catch (promotionError) {
+        await interaction.editReply(
+          '▶️ Stream lancé dans le stage channel.\n⚠️ Erreur lors de l\'auto-promotion en speaker.'
+        );
+        logger.error('🎤 Erreur lors de l\'auto-promotion:', promotionError);
+      }
+
+      logger.success(' Message de succès envoyé');
+    });
 
     player.on('error', async (error) => {
       logger.error('❌ Erreur du player:', {

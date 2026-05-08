@@ -10,8 +10,8 @@ import cache from '../../utils/bot/cache.js';
 class SilenceDetector {
   constructor () {
     this.isMonitoring = false;
-    this.silenceThreshold = 5000; // 5 secondes de silence
-    this.checkInterval = 10000; // Vérification toutes les 10 secondes
+    this.silenceThreshold = 10000; // 5 secondes de silence
+    this.checkInterval = 15000; // Vérification toutes les 10 secondes
     this.lastAudioActivity = Date.now();
     this.silenceStartTime = null;
     this.alertSent = false;
