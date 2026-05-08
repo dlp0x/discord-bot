@@ -10,14 +10,12 @@ import stageSpeakerManager from '../../core/services/StageSpeakerManager.js';
  * Gérer les commandes spéciales qui nécessitent deferReply
  */
 export async function handleSpecialCommands (interaction, result, commandName) {
-  // Traitement spécial pour la commande play
   if (result.message === 'PLAY_COMMAND') {
     logger.info(`Traitement de la commande ${commandName}`);
     await handlePlayCommand(interaction);
     return;
   }
 
-  // Traitement spécial pour la commande schedule
   if (result.message === 'SCHEDULE_COMMAND') {
     logger.info('Traitement de la commande SCHEDULE_COMMAND');
     await handleScheduleCommand(interaction, result);
@@ -40,14 +38,14 @@ async function handlePlayCommand (interaction) {
       channelType: channel?.type
     });
 
-    // Import des modules nécessaires
     logger.info('📦 Import des modules audio...');
     const {
       joinVoiceChannel,
       createAudioPlayer,
       createAudioResource,
       AudioPlayerStatus,
-      NoSubscriberBehavior
+      NoSubscriberBehavior,
+      StreamType
     } = await import('@discordjs/voice');
     logger.success('Modules audio importés avec succès');
 
@@ -55,7 +53,6 @@ async function handlePlayCommand (interaction) {
     const { STREAM_URL } = config;
     logger.info('🔗 URL du stream récupérée:', STREAM_URL ? 'OK' : 'MANQUANTE');
 
-    // Vérifier que l'URL du stream est configurée
     if (!STREAM_URL) {
       logger.error('❌ STREAM_URL non configurée dans les variables d\'environnement');
       await interaction.editReply('❌ URL du stream non configurée. Contactez un administrateur.');
@@ -89,15 +86,20 @@ async function handlePlayCommand (interaction) {
         noSubscriber: NoSubscriberBehavior.Pause
       }
     });
-    logger.success(' Player créé');
+    logger.success('Player créé');
+
+    // StreamType.Arbitrary évite la détection automatique de format
+    // et prévient le TimeoutNegativeWarning de @discordjs/voice
+    const AUDIO_INPUT_TYPE = StreamType?.Arbitrary ?? undefined;
 
     logger.info('🎼 Création de la ressource audio...');
     let resource;
     try {
       resource = createAudioResource(STREAM_URL, {
+        inputType: AUDIO_INPUT_TYPE,
         inlineVolume: true
       });
-      logger.success(' Ressource audio créée');
+      logger.success('Ressource audio créée');
     } catch (resourceError) {
       logger.error('❌ Erreur de création de ressource audio:', {
         message: resourceError.message,
@@ -110,16 +112,14 @@ async function handlePlayCommand (interaction) {
     logger.info('▶️ Lancement de la lecture...');
     player.play(resource);
     connection.subscribe(player);
-    logger.success(' Lecture lancée');
+    logger.success('Lecture lancée');
 
     interaction.client.audio = { connection, player };
     logger.info('💾 Audio sauvegardé dans client.audio');
 
-    // 🎭 Enregistrer le stage pour surveillance automatique
     stageMonitor.registerStage(channel.guild.id, channel.id, channel.guild);
     logger.info('🎭 Stage enregistré pour surveillance automatique');
 
-    // 🔁 Sécurité si le stream prend trop de temps
     const timeout = setTimeout(() => {
       logger.warn('⏰ Timeout de 5s atteint');
       interaction.editReply('⚠️ Aucun son détecté après 5s. Lecture échouée ?');
@@ -129,7 +129,6 @@ async function handlePlayCommand (interaction) {
       logger.info('🎵 Événement Playing détecté');
       clearTimeout(timeout);
 
-      // 🎤 Tentative d'auto-promotion en speaker
       try {
         const promotionResult = await stageSpeakerManager.promoteToSpeaker(connection, channel);
 
@@ -137,7 +136,9 @@ async function handlePlayCommand (interaction) {
           await interaction.editReply('▶️ Stream lancé dans le stage channel. 🎤 Bot promu en speaker automatiquement.');
           logger.success('🎤 Auto-promotion en speaker réussie');
         } else {
-          const missingPerms = stageSpeakerManager.formatMissingPermissions(promotionResult.missingPermissions || []);
+          const missingPerms = stageSpeakerManager.formatMissingPermissions(
+            promotionResult.missingPermissions || []
+          );
           const errorMessage = missingPerms.length > 0
             ? `Permissions manquantes: ${missingPerms.join(', ')}`
             : '';
@@ -154,7 +155,7 @@ async function handlePlayCommand (interaction) {
         logger.error('🎤 Erreur lors de l\'auto-promotion:', promotionError);
       }
 
-      logger.success(' Message de succès envoyé');
+      logger.success('Message de succès envoyé');
     });
 
     player.on('error', async (error) => {
@@ -165,15 +166,14 @@ async function handlePlayCommand (interaction) {
         streamUrl: STREAM_URL
       });
       clearTimeout(timeout);
-      return await interaction.editReply(
+      await interaction.editReply(
         `❌ Erreur pendant la lecture du stream: ${error.message}`
       );
     });
 
-    logger.success(' handlePlayCommand terminé avec succès');
+    logger.success('handlePlayCommand terminé avec succès');
   } catch (error) {
     logger.error('❌ Erreur lors du traitement de la commande play:', error);
-    // L'interaction est déjà différée par le code principal, donc on utilise editReply
     await interaction.editReply({
       content: '❌ Erreur lors de l\'exécution de la commande play.'
     });
@@ -185,11 +185,9 @@ async function handlePlayCommand (interaction) {
  */
 async function handleScheduleCommand (interaction, _result) {
   try {
-    // Import dynamique de la commande schedule
     const scheduleCommand = await import('../../commands/schedule.js');
     const result = await scheduleCommand.default.execute(interaction);
 
-    // L'interaction est déjà différée par le code principal, donc on utilise editReply
     if (result && result.success) {
       await interaction.editReply({
         content: result.message,

@@ -6,6 +6,7 @@ import express from 'express';
 import alertManager from '../../utils/bot/alerts.js';
 import { z } from 'zod';
 import { getApiErrorMessage } from '../../core/monitor.js';
+import { requireApiToken } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -20,13 +21,6 @@ const thresholdsSchema = z.record(
   z.enum(['ping', 'memory', 'errors', 'uptime', 'apiLatency']),
   z.number().min(0)
 );
-
-function requireApiToken (req, res, next) {
-  if (req.headers['x-api-key'] !== process.env.ADMIN_API_KEY) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-  next();
-}
 
 /**
  * GET /v1/alerts

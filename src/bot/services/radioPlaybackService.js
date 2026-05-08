@@ -3,10 +3,17 @@ import {
   createAudioPlayer,
   createAudioResource,
   NoSubscriberBehavior,
-  getVoiceConnection
+  getVoiceConnection,
+  StreamType
 } from '@discordjs/voice';
 import config from '../config.js';
 import logger from '../logger.js';
+
+// StreamType.Arbitrary indique à @discordjs/voice de ne pas tenter
+// de détecter/transcoder le format — évite le TimeoutNegativeWarning.
+// Si StreamType n'est pas disponible (version ancienne), on passe undefined
+// et @discordjs/voice utilisera la détection automatique.
+const AUDIO_INPUT_TYPE = StreamType?.Arbitrary ?? undefined;
 
 const tempVcConnections = new Map();
 
@@ -48,7 +55,10 @@ export async function startRadioInVoiceChannel (channel) {
       }
     });
 
-    const resource = createAudioResource(config.STREAM_URL, { inlineVolume: true });
+    const resource = createAudioResource(config.STREAM_URL, {
+      inputType: AUDIO_INPUT_TYPE,
+      inlineVolume: true
+    });
     player.play(resource);
     connection.subscribe(player);
 

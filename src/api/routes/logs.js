@@ -6,6 +6,7 @@ import express from 'express';
 import logger from '../../bot/logger.js';
 import { z } from 'zod';
 import { getApiErrorMessage } from '../../core/monitor.js';
+import { requireApiToken } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -14,13 +15,6 @@ const logSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   meta: z.record(z.any()).optional()
 });
-
-function requireApiToken (req, res, next) {
-  if (req.headers['x-api-key'] !== process.env.ADMIN_API_KEY) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-  next();
-}
 
 /**
  * GET /v1/logs

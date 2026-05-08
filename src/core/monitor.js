@@ -5,6 +5,7 @@
 import { MessageFlags } from 'discord.js';
 import logger from '../bot/logger.js';
 import appState from './services/AppState.js';
+import { generateErrorId } from '../utils/shared/generateErrorId.js';
 
 class Monitor {
   constructor (loggerInstance = logger) {
@@ -88,7 +89,7 @@ class Monitor {
    * Gère spécifiquement les erreurs 521
    */
   async handle521Error (error, context = 'unknown') {
-    const errorId = this.generateErrorId();
+    const errorId = generateErrorId();
     const now = Date.now();
 
     // Reset du compteur si plus de 5 minutes depuis la dernière erreur 521
@@ -176,7 +177,7 @@ class Monitor {
    * Gère les erreurs de commandes Discord
    */
   async handleCommandError (error, interaction) {
-    const errorId = this.generateErrorId();
+    const errorId = generateErrorId();
     const errorType = this.categorizeError(error);
 
     // Vérifier si c'est une erreur 521
@@ -238,7 +239,7 @@ class Monitor {
     this.updateMetric('apiErrors');
 
     if (typeof res.status === 'function' && typeof res.json === 'function') {
-      const errorId = this.generateErrorId();
+      const errorId = generateErrorId();
       const errorType = this.categorizeError(error);
 
       this.logger.error(
@@ -292,7 +293,7 @@ class Monitor {
       return;
     }
 
-    const errorId = this.generateErrorId();
+    const errorId = generateErrorId();
 
     this.logger.error(
       `[${errorId}] ERREUR CRITIQUE [${context}]: ${error.message}`,
@@ -324,7 +325,7 @@ class Monitor {
       return;
     }
 
-    const errorId = this.generateErrorId();
+    const errorId = generateErrorId();
     this.logger.error(
       `[${errorId}] ERREUR TÂCHE [${context}]: ${error.message}`,
       {
@@ -351,7 +352,7 @@ class Monitor {
 
     this.updateMetric('databaseErrors');
 
-    const errorId = this.generateErrorId();
+    const errorId = generateErrorId();
     this.logger.error(
       `[${errorId}] ERREUR BASE DE DONNÉES [${operation}]: ${error.message}`,
       {

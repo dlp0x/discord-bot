@@ -16,6 +16,7 @@ import {
   timeoutProtection
 } from '../core/middleware/security.js';
 import prometheusMiddleware from './middlewares/prometheus.js';
+import { generateErrorId } from '../utils/shared/generateErrorId.js';
 
 class WebServer {
   constructor (client, logger) {
@@ -76,7 +77,7 @@ class WebServer {
   setupErrorHandling () {
     this.app.use((err, req, res, _next) => {
       // Générer un ID d'erreur unique
-      const errorId = this.generateErrorId();
+      const errorId = generateErrorId();
 
       // Log sécurisé de l'erreur
       this.logger.error(`[${errorId}] Erreur API: ${err.message}`, {

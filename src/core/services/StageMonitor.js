@@ -16,14 +16,8 @@ class StageMonitor {
     // guildId -> { channelId, guild, lastCheck }
     this.connectedStages = new Map();
 
-    // guildId -> timestamp
+    // guildId -> timestamp (stage vide depuis)
     this.emptyStages = new Map();
-
-    // guildIds actuellement en promotion
-    this.promotingStages = new Set();
-
-    // guildId -> timeout
-    this.pendingPromotions = new Map();
 
     this.isDisconnecting = false;
 
@@ -66,14 +60,8 @@ class StageMonitor {
       this.monitoringInterval = null;
     }
 
-    for (const timeout of this.pendingPromotions.values()) {
-      clearTimeout(timeout);
-    }
-
     this.connectedStages.clear();
     this.emptyStages.clear();
-    this.promotingStages.clear();
-    this.pendingPromotions.clear();
 
     logger.info('🎭 Surveillance des stages arrêtée');
   }
@@ -94,147 +82,62 @@ class StageMonitor {
     this.emptyStages.delete(guildId);
 
     if (alreadyRegistered) {
-      logger.debug(
-        `🎭 Stage mis à jour: ${guildId} -> ${channelId}`
-      );
+      logger.debug(`🎭 Stage mis à jour: ${guildId} -> ${channelId}`);
     } else {
-      logger.info(
-        `🎭 Stage enregistré pour surveillance: `
-        + `${guildId} -> ${channelId}`
-      );
+      logger.info(`🎭 Stage enregistré pour surveillance: ${guildId} -> ${channelId}`);
     }
   }
 
   unregisterStage (guildId) {
     this.connectedStages.delete(guildId);
     this.emptyStages.delete(guildId);
-    this.promotingStages.delete(guildId);
 
-    const pendingTimeout = this.pendingPromotions.get(guildId);
-
-    if (pendingTimeout) {
-      clearTimeout(pendingTimeout);
-      this.pendingPromotions.delete(guildId);
-    }
-
-    logger.info(
-      `🎭 Stage désenregistré de la surveillance: ${guildId}`
-    );
+    logger.info(`🎭 Stage désenregistré de la surveillance: ${guildId}`);
   }
 
   // ========================================
-  // Speaker Promotion
+  // Speaker Promotion — délégué à StageSpeakerManager
   // ========================================
 
-  async promoteBotInStage (guildId, channelId) {
-    // anti-double promotion
-    if (this.promotingStages.has(guildId)) {
-      logger.debug(
-        `🎤 Promotion déjà en cours pour ${guildId}, ignorée`
-      );
-      return;
-    }
-
-    // lock IMMÉDIAT
-    this.promotingStages.add(guildId);
-
-    const timeout = setTimeout(async () => {
+  /**
+   * Déclenche la promotion du bot après un délai de 3s.
+   * Le verrou anti-doublon et la vérification de statut sont gérés
+   * par StageSpeakerManager.promoteToSpeakerGuarded.
+   */
+  promoteBotInStage (guildId, channelId) {
+    setTimeout(async () => {
       try {
         const connection = getVoiceConnection(guildId);
-
         if (!connection) {
-          logger.warn(
-            `🎤 Pas de connexion active pour ${guildId}`
-          );
+          logger.warn(`🎤 Pas de connexion active pour ${guildId}`);
+          return;
+        }
+
+        // Vérifier que la connexion est toujours sur le bon canal
+        if (connection.joinConfig.channelId !== channelId) {
+          logger.debug(`🎤 Promotion ignorée: connexion sur un autre canal`);
           return;
         }
 
         const stageInfo = this.connectedStages.get(guildId);
-
-        const channel =
-          stageInfo?.guild?.channels?.cache?.get(channelId);
+        const channel = stageInfo?.guild?.channels?.cache?.get(channelId);
 
         if (!channel) {
-          logger.warn(
-            `🎤 Canal introuvable pour promotion: ${channelId}`
-          );
+          logger.warn(`🎤 Canal introuvable pour promotion: ${channelId}`);
           return;
         }
 
         // 13 = GuildStageVoice
         if (channel.type !== 13) {
-          logger.debug(
-            `🎤 Canal non-stage (${channel.type}), ignoré`
-          );
+          logger.debug(`🎤 Canal non-stage (${channel.type}), ignoré`);
           return;
         }
 
-        // sécurité : toujours connecté au bon stage ?
-        const activeConnection = getVoiceConnection(guildId);
-
-        if (
-          !activeConnection
-          || activeConnection.joinConfig.channelId !== channelId
-        ) {
-          logger.debug(
-            `🎤 Promotion ignorée: connexion inactive`
-          );
-          return;
-        }
-
-        const botMember = channel.guild.members.me;
-
-        // déjà speaker
-        if (
-          botMember?.voice?.channelId === channelId
-          && botMember.voice.suppress === false
-        ) {
-          logger.debug(
-            `🎤 Bot déjà speaker dans ${channel.name}`
-          );
-          return;
-        }
-
-        logger.info(
-          `🎤 Tentative auto-promotion dans ${channel.name}`
-        );
-
-        const result =
-          await stageSpeakerManager.promoteToSpeaker(
-            activeConnection,
-            channel
-          );
-
-        if (result.success) {
-          logger.info(
-            `🎤 Bot auto-promu en speaker dans ${channel.name}`
-          );
-        } else {
-          logger.warn(
-            `🎤 Échec auto-promotion dans `
-            + `${channel.name}: ${result.message}`
-          );
-        }
+        await stageSpeakerManager.promoteToSpeakerGuarded(connection, channel);
       } catch (error) {
-        logger.error(
-          '🎤 Erreur auto-promotion:',
-          error
-        );
-      } finally {
-        this.pendingPromotions.delete(guildId);
-
-        // délai anti-rebond VoiceStateUpdate
-        setTimeout(() => {
-          this.promotingStages.delete(guildId);
-
-          logger.debug(
-            `🎤 Verrou de promotion libéré pour ${guildId}`
-          );
-        }, 5000);
+        logger.error('🎤 Erreur auto-promotion:', error);
       }
     }, 3000);
-
-    this.pendingPromotions.set(guildId, timeout);
   }
 
   // ========================================
@@ -246,15 +149,9 @@ class StageMonitor {
 
     for (const [guildId, stageInfo] of this.connectedStages) {
       try {
-        await this.checkStage(
-          guildId,
-          stageInfo.channelId
-        );
+        await this.checkStage(guildId, stageInfo.channelId);
       } catch (error) {
-        logger.error(
-          `Erreur vérification stage ${guildId}:`,
-          error
-        );
+        logger.error(`Erreur vérification stage ${guildId}:`, error);
       }
     }
   }
@@ -264,41 +161,26 @@ class StageMonitor {
       const connection = getVoiceConnection(guildId);
 
       if (!connection) {
-        logger.info(
-          `🎭 Connexion perdue pour ${guildId}`
-        );
-
+        logger.info(`🎭 Connexion perdue pour ${guildId}`);
         this.unregisterStage(guildId);
         return;
       }
 
       if (connection.joinConfig.channelId !== channelId) {
-        logger.warn(
-          `🎭 Canal inattendu: `
-          + `${connection.joinConfig.channelId}`
-        );
-
+        logger.warn(`🎭 Canal inattendu: ${connection.joinConfig.channelId}`);
         return;
       }
 
       const stageInfo = this.connectedStages.get(guildId);
-
-      const voiceChannel =
-        stageInfo?.guild?.channels?.cache?.get(channelId);
+      const voiceChannel = stageInfo?.guild?.channels?.cache?.get(channelId);
 
       if (!voiceChannel) {
-        logger.warn(
-          `🎭 Canal introuvable: ${channelId}`
-        );
-
+        logger.warn(`🎭 Canal introuvable: ${channelId}`);
         this.unregisterStage(guildId);
         return;
       }
 
-      const humanMembers =
-        voiceChannel.members.filter(
-          member => !member.user.bot
-        );
+      const humanMembers = voiceChannel.members.filter(member => !member.user.bot);
 
       // ========================================
       // Stage vide
@@ -309,39 +191,25 @@ class StageMonitor {
 
         if (!this.emptyStages.has(guildId)) {
           this.emptyStages.set(guildId, now);
-
           logger.info(
             `🎭 Stage "${voiceChannel.name}" vide `
-            + `— déconnexion dans `
-            + `${this.disconnectGraceMs / 1000}s`
+            + `— déconnexion dans ${this.disconnectGraceMs / 1000}s`
           );
-
           return;
         }
 
-        const emptyFor =
-          now - this.emptyStages.get(guildId);
+        const emptyFor = now - this.emptyStages.get(guildId);
 
         if (emptyFor >= this.disconnectGraceMs) {
           logger.info(
-            `🎭 Grâce expirée pour `
-            + `"${voiceChannel.name}" `
+            `🎭 Grâce expirée pour "${voiceChannel.name}" `
             + `(${Math.round(emptyFor / 1000)}s)`
           );
-
-          await this.disconnectFromStage(
-            connection,
-            guildId,
-            voiceChannel
-          );
+          await this.disconnectFromStage(connection, guildId, voiceChannel);
         } else {
-          const remaining = Math.round(
-            (this.disconnectGraceMs - emptyFor) / 1000
-          );
-
+          const remaining = Math.round((this.disconnectGraceMs - emptyFor) / 1000);
           logger.debug(
-            `🎭 Stage vide depuis `
-            + `${Math.round(emptyFor / 1000)}s `
+            `🎭 Stage vide depuis ${Math.round(emptyFor / 1000)}s `
             + `— déconnexion dans ${remaining}s`
           );
         }
@@ -354,18 +222,11 @@ class StageMonitor {
       // ========================================
 
       if (this.emptyStages.has(guildId)) {
-        logger.info(
-          `🎭 Humain(s) revenus dans `
-          + `"${voiceChannel.name}"`
-        );
-
+        logger.info(`🎭 Humain(s) revenus dans "${voiceChannel.name}"`);
         this.emptyStages.delete(guildId);
       }
     } catch (error) {
-      logger.error(
-        `Erreur checkStage ${guildId}:`,
-        error
-      );
+      logger.error(`Erreur checkStage ${guildId}:`, error);
     }
   }
 
@@ -373,19 +234,13 @@ class StageMonitor {
   // Disconnect
   // ========================================
 
-  async disconnectFromStage (
-    connection,
-    guildId,
-    voiceChannel
-  ) {
+  async disconnectFromStage (connection, guildId, voiceChannel) {
     if (this.isDisconnecting) return;
 
     try {
       this.isDisconnecting = true;
 
-      const player =
-        connection?.state?.subscription?.player;
-
+      const player = connection?.state?.subscription?.player;
       if (player) {
         player.stop(true);
       }
@@ -393,18 +248,11 @@ class StageMonitor {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       connection.destroy();
-
       this.unregisterStage(guildId);
 
-      logger.info(
-        `🎭 Bot déconnecté du stage `
-        + `"${voiceChannel.name}"`
-      );
+      logger.info(`🎭 Bot déconnecté du stage "${voiceChannel.name}"`);
     } catch (error) {
-      logger.error(
-        'Erreur déconnexion stage:',
-        error
-      );
+      logger.error('Erreur déconnexion stage:', error);
     } finally {
       this.isDisconnecting = false;
     }
@@ -422,38 +270,25 @@ class StageMonitor {
     // ========================================
 
     if (newState.member?.id === botId) {
-      // même canal = suppress toggle
+      // Même canal = suppress toggle uniquement, ignorer
       if (oldState.channelId === newState.channelId) {
-        logger.debug(
-          '🎭 VoiceStateUpdate du bot ignoré '
-          + '(même canal)'
-        );
-
+        logger.debug('🎭 VoiceStateUpdate du bot ignoré (même canal)');
         return;
       }
 
-      // bot rejoint stage
+      // Bot rejoint un stage
       if (newState.channelId) {
         const channel = newState.channel;
 
         if (channel?.type === 13) {
           logger.info(
-            `🎭 Bot a rejoint un stage: `
-            + `${channel.name} `
-            + `(${newState.guild.id})`
+            `🎭 Bot a rejoint un stage: ${channel.name} (${newState.guild.id})`
           );
 
-          this.registerStage(
-            newState.guild.id,
-            newState.channelId,
-            newState.guild
-          );
+          this.registerStage(newState.guild.id, newState.channelId, newState.guild);
 
-          // UNIQUE SOURCE DE PROMOTION
-          void this.promoteBotInStage(
-            newState.guild.id,
-            newState.channelId
-          );
+          // Promotion déléguée à StageSpeakerManager (verrou inclus)
+          this.promoteBotInStage(newState.guild.id, newState.channelId);
         }
       }
 
@@ -468,15 +303,11 @@ class StageMonitor {
       oldState.channelId
       && this.connectedStages.has(oldState.guild.id)
     ) {
-      const stageInfo =
-        this.connectedStages.get(oldState.guild.id);
+      const stageInfo = this.connectedStages.get(oldState.guild.id);
 
       if (stageInfo.channelId === oldState.channelId) {
         setTimeout(() => {
-          void this.checkStage(
-            oldState.guild.id,
-            stageInfo.channelId
-          );
+          void this.checkStage(oldState.guild.id, stageInfo.channelId);
         }, 2000);
       }
     }
@@ -491,8 +322,6 @@ class StageMonitor {
       isMonitoring: this.isMonitoring,
       connectedStages: this.connectedStages.size,
       emptyStages: this.emptyStages.size,
-      pendingPromotions: this.pendingPromotions.size,
-      promotingStages: this.promotingStages.size,
       checkInterval: this.checkInterval,
       disconnectGraceMs: this.disconnectGraceMs
     };

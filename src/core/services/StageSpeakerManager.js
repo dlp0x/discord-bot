@@ -6,6 +6,8 @@ import { PermissionFlagsBits } from 'discord.js';
 import logger from '../../bot/logger.js';
 
 class StageSpeakerManager {
+  #promotingGuilds = new Set();
+
   constructor () {
     this.requiredPermissions = [
       PermissionFlagsBits.Connect,
@@ -17,7 +19,7 @@ class StageSpeakerManager {
   }
 
   /**
-   * VÃ©rifier si le bot a les permissions nÃ©cessaires pour s'auto-promouvoir
+   * Vérifier si le bot a les permissions nécessaires pour s'auto-promouvoir
    */
   checkBotPermissions (guild, channel) {
     try {
@@ -33,22 +35,42 @@ class StageSpeakerManager {
         return { hasPermissions: false, missingPermissions: this.requiredPermissions };
       }
 
-      const missingPermissions = this.requiredPermissions.filter(permission =>
-        !channelPermissions.has(permission));
+      const missingPermissions = this.requiredPermissions.filter(
+        permission => !channelPermissions.has(permission)
+      );
 
-      const hasPermissions = missingPermissions.length === 0;
-
-      logger.debug('Vérification des permissions:', {
-        hasPermissions,
-        missingPermissions: missingPermissions.map(p => PermissionFlagsBits[p]),
-        channelId: channel.id,
-        channelName: channel.name
-      });
-
-      return { hasPermissions, missingPermissions };
+      return {
+        hasPermissions: missingPermissions.length === 0,
+        missingPermissions
+      };
     } catch (error) {
       logger.error('Erreur lors de la vérification des permissions:', error);
       return { hasPermissions: false, missingPermissions: this.requiredPermissions };
+    }
+  }
+
+  /**
+   * Vérifier le statut actuel du bot dans le stage
+   */
+  getBotStageStatus (guild, channel) {
+    try {
+      const botMember = guild.members.me;
+      if (!botMember?.voice) {
+        return { isConnected: false, isSpeaker: false, isSuppressed: true, channelId: null };
+      }
+
+      const isConnected = botMember.voice.channelId === channel.id;
+      const isSuppressed = botMember.voice.suppress;
+
+      return {
+        isConnected,
+        isSpeaker: isConnected && !isSuppressed,
+        isSuppressed,
+        channelId: botMember.voice.channelId
+      };
+    } catch (error) {
+      logger.error('Erreur lors de la vérification du statut du stage:', error);
+      return { isConnected: false, isSpeaker: false, isSuppressed: true, channelId: null };
     }
   }
 
@@ -61,10 +83,13 @@ class StageSpeakerManager {
         throw new Error('Connexion ou canal manquant');
       }
 
-      const { hasPermissions, missingPermissions } = this.checkBotPermissions(channel.guild, channel);
+      const { hasPermissions, missingPermissions } = this.checkBotPermissions(
+        channel.guild,
+        channel
+      );
 
       if (!hasPermissions) {
-        const missingNames = missingPermissions.map(p => PermissionFlagsBits[p]).join(', ');
+        const missingNames = this.formatMissingPermissions(missingPermissions).join(', ');
         logger.warn(`Permissions manquantes pour l'auto-promotion: ${missingNames}`);
         return {
           success: false,
@@ -81,12 +106,7 @@ class StageSpeakerManager {
 
       await botMember.voice.setSuppressed(false);
 
-      
-
-      return {
-        success: true,
-        message: 'Bot promu en speaker avec succès'
-      };
+      return { success: true, message: 'Bot promu en speaker avec succès' };
     } catch (error) {
       let errorType = 'UNKNOWN_ERROR';
       let userMessage = 'Erreur inconnue lors de la promotion en speaker';
@@ -118,43 +138,52 @@ class StageSpeakerManager {
   }
 
   /**
-   * VÃ©rifier le statut actuel du bot dans le stage
+   * Promouvoir le bot en speaker avec verrou anti-doublon.
+   * Remplace l'ancien système promotingStages/pendingPromotions de StageMonitor.
    */
-  getBotStageStatus (guild, channel) {
+  async promoteToSpeakerGuarded (connection, channel) {
+    const guildId = channel.guild.id;
+
+    if (this.#promotingGuilds.has(guildId)) {
+      logger.debug(`🎤 Promotion déjà en cours pour ${guildId}, ignorée`);
+      return { success: false, message: 'ALREADY_PROMOTING' };
+    }
+
+    // Vérifier avant d'acquérir le verrou
+    const status = this.getBotStageStatus(channel.guild, channel);
+    if (status.isSpeaker) {
+      logger.debug(`🎤 Bot déjà speaker dans ${channel.name}`);
+      return { success: true, message: 'ALREADY_SPEAKER' };
+    }
+
+    this.#promotingGuilds.add(guildId);
+
     try {
-      const botMember = guild.members.me;
-      if (!botMember || !botMember.voice) {
-        return {
-          isConnected: false,
-          isSpeaker: false,
-          isSuppressed: true,
-          channelId: null
-        };
+      logger.info(`🎤 Tentative auto-promotion dans ${channel.name}`);
+      const result = await this.promoteToSpeaker(connection, channel);
+
+      if (result.success) {
+        logger.info(`🎤 Bot auto-promu en speaker dans ${channel.name}`);
+      } else {
+        const missingPerms = this.formatMissingPermissions(result.missingPermissions || []);
+        logger.warn(
+          `🎤 Échec auto-promotion dans ${channel.name}: ${result.message}`
+          + (missingPerms.length ? ` (${missingPerms.join(', ')})` : '')
+        );
       }
 
-      const isConnected = botMember.voice.channelId === channel.id;
-      const isSuppressed = botMember.voice.suppress;
-      const isSpeaker = isConnected && !isSuppressed;
-
-      return {
-        isConnected,
-        isSpeaker,
-        isSuppressed,
-        channelId: botMember.voice.channelId
-      };
-    } catch (error) {
-      logger.error('Erreur lors de la vÃ©rification du statut du stage:', error);
-      return {
-        isConnected: false,
-        isSpeaker: false,
-        isSuppressed: true,
-        channelId: null
-      };
+      return result;
+    } finally {
+      // Délai anti-rebond VoiceStateUpdate
+      setTimeout(() => {
+        this.#promotingGuilds.delete(guildId);
+        logger.debug(`🎤 Verrou de promotion libéré pour ${guildId}`);
+      }, 5000);
     }
   }
 
   /**
-   * Obtenir des informations dÃ©taillÃ©es sur les permissions et le statut
+   * Obtenir des informations détaillées sur les permissions et le statut
    */
   getDetailedStatus (guild, channel, _connection) {
     const permissions = this.checkBotPermissions(guild, channel);
@@ -175,11 +204,12 @@ class StageSpeakerManager {
     const permissionNames = {
       [PermissionFlagsBits.Connect]: 'Se connecter',
       [PermissionFlagsBits.Speak]: 'Parler',
-      [PermissionFlagsBits.RequestToSpeak]: 'Demander Ã  parler'
+      [PermissionFlagsBits.RequestToSpeak]: 'Demander à parler'
     };
 
-    return missingPermissions.map(permission =>
-      permissionNames[permission] || `Permission inconnue (${permission})`);
+    return missingPermissions.map(
+      permission => permissionNames[permission] || `Permission inconnue (${permission})`
+    );
   }
 }
 
