@@ -85,6 +85,7 @@
     "db:deploy": "node scripts/dev/init-db.js",
     "git-actions": "node scripts/git/git-actions.js",
     "test": "vitest --config src/config/vitest.config.js",
+    "test:ci": "vitest run --config src/config/vitest.config.js --reporter=default --reporter=junit --outputFile.junit=reports/junit.xml",
     "test:coverage": "vitest --coverage --config src/config/vitest.config.js",
     "test:integration": "vitest src/tests/integration/ --config src/config/vitest.config.js",
     "test:performance": "vitest src/tests/performance/ --config src/config/vitest.config.js",
