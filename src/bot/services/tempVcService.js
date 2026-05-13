@@ -30,16 +30,40 @@ const RENAME_COOLDOWN_MS = 3 * 60 * 1000;
 function tempVcPanelRows () {
   return [
     new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('tempvc_rename').setLabel('Rename').setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId('tempvc_limit').setLabel('Set user limit').setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId('tempvc_lock').setLabel('Lock').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tempvc_unlock').setLabel('Unlock').setStyle(ButtonStyle.Secondary)
+      new ButtonBuilder()
+        .setCustomId('tempvc_rename')
+        .setLabel('Rename')
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId('tempvc_limit')
+        .setLabel('Set user limit')
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId('tempvc_lock')
+        .setLabel('Lock')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('tempvc_unlock')
+        .setLabel('Unlock')
+        .setStyle(ButtonStyle.Secondary)
     ),
     new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('tempvc_hide').setLabel('Hide').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tempvc_unhide').setLabel('Unhide').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tempvc_claim').setLabel('Claim').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId('tempvc_toggle_autoplay').setLabel('Auto-play radio').setStyle(ButtonStyle.Success)
+      new ButtonBuilder()
+        .setCustomId('tempvc_hide')
+        .setLabel('Hide')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('tempvc_unhide')
+        .setLabel('Unhide')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('tempvc_claim')
+        .setLabel('Claim')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId('tempvc_toggle_autoplay')
+        .setLabel('Auto-play radio')
+        .setStyle(ButtonStyle.Success)
     )
   ];
 }
@@ -57,7 +81,10 @@ async function assertManageRights (interaction, record) {
   const isAdmin = interaction.memberPermissions?.has(PermissionFlagsBits.ManageChannels);
 
   if (!isOwner && !isAdmin) {
-    return { ok: false, message: '❌ Seul le propriétaire (ou un admin) peut gérer ce salon.' };
+    return {
+      ok: false,
+      message: '❌ Seul le propriétaire (ou un admin) peut gérer ce salon.'
+    };
   }
 
   return { ok: true };
@@ -69,11 +96,19 @@ export async function setupTempVc (interaction) {
   const autoPlayRadio = interaction.options.getBoolean('auto_play_radio') ?? false;
 
   if (joinChannel.type !== ChannelType.GuildVoice) {
-    return { success: false, message: '❌ Le salon Join-to-Create doit être un salon vocal classique.', ephemeral: true };
+    return {
+      success: false,
+      message: '❌ Le salon Join-to-Create doit être un salon vocal classique.',
+      ephemeral: true
+    };
   }
 
   if (category && category.type !== ChannelType.GuildCategory) {
-    return { success: false, message: '❌ La catégorie doit être un salon de type catégorie.', ephemeral: true };
+    return {
+      success: false,
+      message: '❌ La catégorie doit être un salon de type catégorie.',
+      ephemeral: true
+    };
   }
 
   await upsertTempVcSettings({
@@ -85,7 +120,10 @@ export async function setupTempVc (interaction) {
 
   return {
     success: true,
-    message: `✅ Join-to-Create configuré sur **${joinChannel.name}**.${category ? `\n📁 Catégorie: **${category.name}**` : ''}\n📻 Auto-play radio global: **${autoPlayRadio ? 'activé' : 'désactivé'}**`,
+    message:
+      `✅ Join-to-Create configuré sur **${joinChannel.name}**.`
+      + `${category ? `\n📁 Catégorie: **${category.name}**` : ''}`
+      + `\n📻 Auto-play radio global: **${autoPlayRadio ? 'activé' : 'désactivé'}**`,
     ephemeral: true
   };
 }
@@ -93,12 +131,20 @@ export async function setupTempVc (interaction) {
 export async function sendTempVcPanel (interaction) {
   const channel = getMemberTempChannel(interaction);
   if (!channel) {
-    return { success: false, message: '❌ Tu dois être dans ton salon temporaire.', ephemeral: true };
+    return {
+      success: false,
+      message: '❌ Tu dois être dans ton salon temporaire.',
+      ephemeral: true
+    };
   }
 
   const record = await getTempVcChannelRecord(channel.id);
   if (!record) {
-    return { success: false, message: '❌ Ce salon n\'est pas un salon temporaire.', ephemeral: true };
+    return {
+      success: false,
+      message: '❌ Ce salon n\'est pas un salon temporaire.',
+      ephemeral: true
+    };
   }
 
   return {
@@ -163,7 +209,6 @@ export async function handleJoinToCreate (oldState, newState) {
     return;
   }
 
-
   // Auto-play de sécurité: si un membre rejoint un temp VC avec auto-play actif
   if (newState.channelId) {
     const joinedRecord = await getTempVcChannelRecord(newState.channelId);
@@ -199,7 +244,10 @@ function getRenameCooldownLeft (userId) {
 export async function handleTempVcButton (interaction) {
   const channel = getMemberTempChannel(interaction);
   if (!channel) {
-    await interaction.reply({ content: '❌ Tu dois être dans un salon temporaire.', ephemeral: true });
+    await interaction.reply({
+      content: '❌ Tu dois être dans un salon temporaire.',
+      ephemeral: true
+    });
     return { success: true, message: 'BUTTON_HANDLED' };
   }
 
@@ -207,13 +255,19 @@ export async function handleTempVcButton (interaction) {
 
   if (interaction.customId === 'tempvc_claim') {
     if (!record) {
-      await interaction.reply({ content: '❌ Ce salon n\'est pas géré par TempVC.', ephemeral: true });
+      await interaction.reply({
+        content: '❌ Ce salon n\'est pas géré par TempVC.',
+        ephemeral: true
+      });
       return { success: true, message: 'BUTTON_HANDLED' };
     }
 
     const ownerStillInside = channel.members.has(record.ownerId);
     if (ownerStillInside) {
-      await interaction.reply({ content: '❌ Le propriétaire est encore présent.', ephemeral: true });
+      await interaction.reply({
+        content: '❌ Le propriétaire est encore présent.',
+        ephemeral: true
+      });
       return { success: true, message: 'BUTTON_HANDLED' };
     }
 
@@ -227,7 +281,10 @@ export async function handleTempVcButton (interaction) {
       ViewChannel: true
     });
 
-    await interaction.reply({ content: '✅ Tu es maintenant le propriétaire de ce salon.', ephemeral: true });
+    await interaction.reply({
+      content: '✅ Tu es maintenant le propriétaire de ce salon.',
+      ephemeral: true
+    });
     return { success: true, message: 'BUTTON_HANDLED' };
   }
 
@@ -241,7 +298,10 @@ export async function handleTempVcButton (interaction) {
     const cooldownLeft = getRenameCooldownLeft(interaction.user.id);
     if (cooldownLeft > 0) {
       const seconds = Math.ceil(cooldownLeft / 1000);
-      await interaction.reply({ content: `⏳ Rename disponible dans ${seconds}s.`, ephemeral: true });
+      await interaction.reply({
+        content: `⏳ Rename disponible dans ${seconds}s.`,
+        ephemeral: true
+      });
       return { success: true, message: 'BUTTON_HANDLED' };
     }
 
@@ -285,7 +345,10 @@ export async function handleTempVcButton (interaction) {
       ViewChannel: true
     });
     await updateTempVcFlags(channel.id, { isLocked: shouldLock });
-    await interaction.reply({ content: shouldLock ? '🔒 Salon verrouillé.' : '🔓 Salon déverrouillé.', ephemeral: true });
+    await interaction.reply({
+      content: shouldLock ? '🔒 Salon verrouillé.' : '🔓 Salon déverrouillé.',
+      ephemeral: true
+    });
     return { success: true, message: 'BUTTON_HANDLED' };
   }
 
@@ -296,7 +359,10 @@ export async function handleTempVcButton (interaction) {
       Connect: true
     });
     await updateTempVcFlags(channel.id, { isHidden: shouldHide });
-    await interaction.reply({ content: shouldHide ? '🙈 Salon caché.' : '👁️ Salon visible.', ephemeral: true });
+    await interaction.reply({
+      content: shouldHide ? '🙈 Salon caché.' : '👁️ Salon visible.',
+      ephemeral: true
+    });
     return { success: true, message: 'BUTTON_HANDLED' };
   }
 
@@ -310,7 +376,10 @@ export async function handleTempVcButton (interaction) {
       stopRadioForTempChannel(channel.id);
     }
 
-    await interaction.reply({ content: `📻 Auto-play radio ${nextValue ? 'activé' : 'désactivé'} pour ce salon.`, ephemeral: true });
+    await interaction.reply({
+      content: `📻 Auto-play radio ${nextValue ? 'activé' : 'désactivé'} pour ce salon.`,
+      ephemeral: true
+    });
     return { success: true, message: 'BUTTON_HANDLED' };
   }
 
@@ -339,7 +408,10 @@ export async function handleTempVcModal (interaction) {
     const newName = interaction.fields.getTextInputValue('name').trim();
     await channel.setName(newName);
     renameCooldown.set(interaction.user.id, Date.now());
-    await interaction.reply({ content: `✅ Salon renommé: **${newName}**`, ephemeral: true });
+    await interaction.reply({
+      content: `✅ Salon renommé: **${newName}**`,
+      ephemeral: true
+    });
     return { success: true, message: 'MODAL_HANDLED' };
   }
 
@@ -348,12 +420,18 @@ export async function handleTempVcModal (interaction) {
     const parsed = Number(rawValue);
 
     if (!Number.isInteger(parsed) || parsed < 0 || parsed > 99) {
-      await interaction.reply({ content: '❌ Valeur invalide. Entre 0 et 99.', ephemeral: true });
+      await interaction.reply({
+        content: '❌ Valeur invalide. Entre 0 et 99.',
+        ephemeral: true
+      });
       return { success: true, message: 'MODAL_HANDLED' };
     }
 
     await channel.setUserLimit(parsed);
-    await interaction.reply({ content: `✅ Limite définie sur **${parsed}**.`, ephemeral: true });
+    await interaction.reply({
+      content: `✅ Limite définie sur **${parsed}**.`,
+      ephemeral: true
+    });
     return { success: true, message: 'MODAL_HANDLED' };
   }
 

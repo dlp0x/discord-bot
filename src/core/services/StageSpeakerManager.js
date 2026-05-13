@@ -167,8 +167,8 @@ class StageSpeakerManager {
       } else {
         const missingPerms = this.formatMissingPermissions(result.missingPermissions || []);
         logger.warn(
-          `🎤 Échec auto-promotion dans ${channel.name}: ${result.message}`
-          + (missingPerms.length ? ` (${missingPerms.join(', ')})` : '')
+          `🎤 Échec auto-promotion dans ${channel.name}: ${result.message}${
+            missingPerms.length ? ` (${missingPerms.join(', ')})` : ''}`
         );
       }
 

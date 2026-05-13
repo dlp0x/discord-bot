@@ -1,5 +1,4 @@
 import {
-  SlashCommandSubcommandBuilder,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -48,4 +47,3 @@ async function execute (interaction) {
 }
 
 export default { builder, execute };
-

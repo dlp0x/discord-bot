@@ -28,7 +28,7 @@ export default class CommandHandler {
   }
 
   async handle (interaction, context) {
-    const commandName = interaction.commandName;
+    const { commandName } = interaction;
     const command = context.client.commands?.get(commandName);
 
     if (!command) {
@@ -90,7 +90,7 @@ export default class CommandHandler {
       return null;
     }
 
-    logger.warn(`[CMD] permission denied`, {
+    logger.warn('[CMD] permission denied', {
       command: interaction.commandName,
       userId: interaction.user?.id
     });
@@ -135,7 +135,6 @@ export default class CommandHandler {
   normalizeResult (result, meta, commandName, interaction) {
     if (result && typeof result === 'object' && 'success' in result) {
       return {
-        ephemeral: meta.ephemeral,
         ...result,
         ephemeral: result.ephemeral ?? meta.ephemeral
       };
@@ -172,4 +171,3 @@ export default class CommandHandler {
     };
   }
 }
-

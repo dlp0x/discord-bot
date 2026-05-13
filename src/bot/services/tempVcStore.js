@@ -105,7 +105,10 @@ export async function deleteTempVcChannelRecord (channelId) {
 
 export async function updateTempVcOwner (channelId, ownerId) {
   await ensureTables();
-  await db.query('UPDATE tempvc_channels SET owner_id = ?, updated_at = CURRENT_TIMESTAMP WHERE channel_id = ?', [ownerId, channelId]);
+  await db.query(
+    'UPDATE tempvc_channels SET owner_id = ?, updated_at = CURRENT_TIMESTAMP WHERE channel_id = ?',
+    [ownerId, channelId]
+  );
 }
 
 export async function updateTempVcFlags (channelId, flags) {
