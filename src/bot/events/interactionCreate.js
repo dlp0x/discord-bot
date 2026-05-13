@@ -2,7 +2,7 @@
 // bot/events/interactionCreate.js - Point d'entrée principal pour les interactions Discord
 // ========================================
 
-import { Events } from 'discord.js';
+import {Events, MessageFlags } from 'discord.js';
 import AppState from '../../core/services/AppState.js';
 import { RetryManager } from '../../utils/shared/retry.js';
 import { checkRateLimit, recordCommand } from '../../utils/shared/rateLimiter.js';
@@ -12,6 +12,9 @@ import {
   secureSecurityAlert
 } from '../../utils/shared/secureLogger.js';
 import logger from '../logger.js';
+import CommandHandler from '../handlers/CommandHandler.js';
+import config from '../config.js';
+import { createServices } from '../services/ServiceManager.js';
 
 // Mode logs compacts: ne garder que start/success et erreurs
 const COMPACT_LOGS = process.env.COMPACT_LOGS === 'true';
@@ -33,6 +36,9 @@ const interactionRetryManager = new RetryManager({
   }
 });
 
+const commandHandler = new CommandHandler();
+const services = createServices();
+
 export default {
   name: Events.InteractionCreate,
   async execute (interaction) {
@@ -47,7 +53,7 @@ export default {
 
     // Utiliser interaction.client comme fallback si AppState.client est undefined
     const discordClient = client || interaction.client;
-    const discordConfig = (await import('../../bot/config.js')).default;
+    const discordConfig = config;
 
     try {
       // Validation de base de l'interaction
@@ -166,7 +172,7 @@ async function handleRateLimit (interaction, userId, commandName) {
 
     await interaction.reply({
       content: `⚠️ ${errorMessage}`,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
 
     return { allowed: false };
@@ -197,7 +203,7 @@ async function handleValidationError (
 
   await interaction.reply({
     content: `❌ ${validationResult.error}`,
-    ephemeral: true
+    flags: MessageFlags.Ephemeral
   });
 }
 
@@ -217,6 +223,15 @@ async function executeWithRetry (
     return await interactionRetryManager.execute(
       async () => {
         logger.debug(`Début du traitement de l'interaction ${commandName}`);
+
+        if (interaction.isChatInputCommand()) {
+          return await commandHandler.handle(interaction, {
+            client: discordClient,
+            logger,
+            config: discordConfig,
+            services
+          });
+        }
 
         const result = await handleInteractionByType(
           interaction,
@@ -241,7 +256,7 @@ async function executeWithRetry (
       await interaction.reply({
         content:
           '❌ Une erreur est survenue lors du traitement de votre demande.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     } else if (interaction.deferred) {
       await interaction.editReply({
@@ -270,6 +285,10 @@ async function handleInteractionResponse (interaction, result, commandName) {
       logger.info('Bouton traité avec succès');
       return;
     }
+    if (result.message === 'INTERACTION_ALREADY_HANDLED') {
+      logger.debug('Interaction déjà gérée dans la commande');
+      return;
+    }
 
     // Gestion spéciale pour les commandes qui nécessitent deferReply
     if (result.deferReply) {
@@ -294,11 +313,21 @@ async function handleInteractionResponse (interaction, result, commandName) {
         return;
       }
       logger.debug('Réponse normale avec interaction.reply()');
+      const messagePayload
+        = result.message && typeof result.message === 'object'
+          ? result.message
+          : {
+              content: result.message ?? result.content,
+              embeds: result.embeds,
+              components: result.components,
+              ephemeral: result.ephemeral !== false
+            };
       await interaction.reply({
-        content: result.message,
-        embeds: result.embeds,
-        components: result.components,
-        ephemeral: result.ephemeral !== false
+        ...messagePayload,
+        ephemeral:
+          typeof messagePayload.ephemeral === 'boolean'
+            ? messagePayload.ephemeral
+            : result.ephemeral !== false
       });
     }
   } else {
@@ -312,7 +341,7 @@ async function handleInteractionResponse (interaction, result, commandName) {
       await interaction.reply({
         content:
           '❌ Une erreur est survenue lors du traitement de votre demande.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }
@@ -342,7 +371,7 @@ async function handleInteractionError (interaction, error, startTime) {
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
         content: errorMessage,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     } else if (interaction.deferred) {
       await interaction.editReply({

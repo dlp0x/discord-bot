@@ -3,7 +3,6 @@ import scheduleSubcommand from './schedule.js';
 import statsSubcommand from './stats.js';
 import speakerStatusSubcommand from './speaker-status.js';
 import promoteSpeakerSubcommand from './promote-speaker.js';
-import streamConfigSubcommand from './stream-config.js';
 import config from '../../config.js';
 
 export default {
@@ -14,8 +13,7 @@ export default {
     .addSubcommand(scheduleSubcommand.builder(new SlashCommandSubcommandBuilder()))
     .addSubcommand(statsSubcommand.builder(new SlashCommandSubcommandBuilder()))
     .addSubcommand(speakerStatusSubcommand.builder)
-    .addSubcommand(promoteSpeakerSubcommand.builder)
-    .addSubcommand(streamConfigSubcommand.builder),
+    .addSubcommand(promoteSpeakerSubcommand.builder),
 
   async execute (interaction) {
     const subcommand = interaction.options.getSubcommand();
@@ -40,8 +38,6 @@ export default {
       return await speakerStatusSubcommand.execute(interaction);
     case 'promote-speaker':
       return await promoteSpeakerSubcommand.execute(interaction);
-    case 'stream-config':
-      return await streamConfigSubcommand.execute(interaction);
     default:
       return await interaction.reply({
         content: '❌ Sous-commande inconnue.',

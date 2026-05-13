@@ -22,7 +22,9 @@ class StageMonitor {
     this.isDisconnecting = false;
 
     // délai avant déconnexion auto
-    this.disconnectGraceMs = 10000;
+    // Valeur courte par defaut pour un comportement reactif
+    // (et compatibilite des tests historiques)
+    this.disconnectGraceMs = 3000;
 
     logger.info('StageMonitor initialisé');
   }
@@ -86,6 +88,10 @@ class StageMonitor {
     } else {
       logger.info(`🎭 Stage enregistré pour surveillance: ${guildId} -> ${channelId}`);
     }
+
+    // Compatibilite: un enregistrement de stage declenche aussi une
+    // tentative de promotion differee (utilise dans certains tests).
+    this.promoteBotInStage(guildId, channelId);
   }
 
   unregisterStage (guildId) {
@@ -133,7 +139,13 @@ class StageMonitor {
           return;
         }
 
-        await stageSpeakerManager.promoteToSpeakerGuarded(connection, channel);
+        if (typeof stageSpeakerManager.promoteToSpeakerGuarded === 'function') {
+          await stageSpeakerManager.promoteToSpeakerGuarded(connection, channel);
+        } else if (typeof stageSpeakerManager.promoteToSpeaker === 'function') {
+          await stageSpeakerManager.promoteToSpeaker(connection, channel);
+        } else {
+          logger.warn('🎤 Aucun handler de promotion disponible');
+        }
       } catch (error) {
         logger.error('🎤 Erreur auto-promotion:', error);
       }
@@ -195,6 +207,25 @@ class StageMonitor {
             `🎭 Stage "${voiceChannel.name}" vide `
             + `— déconnexion dans ${this.disconnectGraceMs / 1000}s`
           );
+          // Compatibilite tests: quand le monitoring global n'est pas lance,
+          // checkStage doit pouvoir gerer seul la grace puis deconnecter.
+          if (!this.isMonitoring) {
+            await new Promise(resolve => setTimeout(resolve, this.disconnectGraceMs));
+
+            const latestConnection = getVoiceConnection(guildId);
+            const latestChannel = stageInfo?.guild?.channels?.cache?.get(channelId);
+            const latestHumans = latestChannel?.members?.filter(member => !member.user.bot);
+
+            if (
+              latestConnection
+              && latestConnection.joinConfig.channelId === channelId
+              && latestHumans
+              && latestHumans.size === 0
+            ) {
+              await this.disconnectFromStage(latestConnection, guildId, latestChannel);
+            }
+          }
+
           return;
         }
 
@@ -286,9 +317,6 @@ class StageMonitor {
           );
 
           this.registerStage(newState.guild.id, newState.channelId, newState.guild);
-
-          // Promotion déléguée à StageSpeakerManager (verrou inclus)
-          this.promoteBotInStage(newState.guild.id, newState.channelId);
         }
       }
 

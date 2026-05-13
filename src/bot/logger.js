@@ -6,20 +6,21 @@
 import chalk from 'chalk';
 
 const LEVELS = {
-  TRACE: { label: 'TRACE',  color: chalk.gray, priority: 0 },
-  DEBUG: { label: 'DEBUG',  color: chalk.magenta, priority: 1 },
-  INFO: { label: 'INFO',   color: chalk.cyan, priority: 2 },
-  WARN: { label: 'WARN',   color: chalk.yellowBright, priority: 3 },
-  ERROR: { label: 'ERROR',  color: chalk.redBright.bold, priority: 4 },
-  SUCCESS: { label: '✓ OK',   color: chalk.greenBright, priority: 5 },
+  IGNR: { label: '↳',  color: chalk.gray, priority: 0 },
+  TRACE: { label: 'TRACE',  color: chalk.gray, priority: 1 },
+  DEBUG: { label: 'DEBUG',  color: chalk.magenta, priority: 2 },
+  INFO: { label: 'INFO',   color: chalk.cyan, priority: 3 },
+  WARN: { label: 'WARN',   color: chalk.yellowBright, priority: 4 },
+  ERROR: { label: 'ERROR',  color: chalk.redBright.bold, priority: 5 },
+  SUCCESS: { label: '✓ OK',   color: chalk.greenBright, priority: 6 },
 
-  CMD: { label: 'CMD',    color: chalk.blueBright, priority: 6 },
-  EVENT: { label: 'EVT',    color: chalk.magentaBright, priority: 7 },
-  API: { label: 'API',    color: chalk.cyanBright, priority: 8 },
-  BOT: { label: 'BOT',    color: chalk.greenBright, priority: 9 },
-  TASK: { label: 'TASK',   color: chalk.yellowBright, priority: 10 },
-  INIT: { label: 'INIT',   color: chalk.hex('#FFA500'), priority: 11 },
-  UPDATE: { label: 'UPD',    color: chalk.hex('#FFFFFF'), priority: 12 }
+  CMD: { label: 'CMD',    color: chalk.blueBright, priority: 7 },
+  EVENT: { label: 'EVT',    color: chalk.magentaBright, priority: 8 },
+  API: { label: 'API',    color: chalk.cyanBright, priority: 9 },
+  BOT: { label: 'BOT',    color: chalk.greenBright, priority: 10 },
+  TASK: { label: 'TASK',   color: chalk.yellowBright, priority: 11 },
+  INIT: { label: 'INIT',   color: chalk.hex('#FFA500'), priority: 12 },
+  UPDATE: { label: 'UPD',    color: chalk.hex('#FFFFFF'), priority: 13 }
 };
 
 class PerformanceLogger {
@@ -72,6 +73,7 @@ class PerformanceLogger {
   }
 
   // Méthodes par niveau
+  none = (...args) => this.write('', ...args);
   trace = (...args) => this.write('TRACE', ...args);
   debug = (...args) => this.write('DEBUG', ...args);
   info = (...args) => this.write('INFO', ...args);

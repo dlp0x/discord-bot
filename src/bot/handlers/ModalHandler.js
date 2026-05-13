@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 // ========================================
 // bot/events/handlers/ModalHandler.js - Gestion des soumissions de modaux
 // ========================================
@@ -13,7 +14,7 @@ export async function handleModalSubmit (interaction, _client, _db, _config) {
     return {
       success: true,
       message: 'Votre suggestion a été soumise avec succès!',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   }
 

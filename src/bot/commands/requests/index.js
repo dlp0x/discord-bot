@@ -1,43 +1,42 @@
 import { SlashCommandBuilder } from 'discord.js';
-import askSubcommand from './requests.js';
-import editSubcommand from './requests-edit.js';
+import addSubcommand from './requests.js';
 import deleteSubcommand from './requests-delete.js';
 import listSubcommand from './requests-list.js';
+import searchSubcommand from './requests-search.js';
 import config from '../../config.js';
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('request')
-    .setDescription('Gérer les suggestions de morceaux')
+    .setName('requests')
+    .setDescription('Gerer les requests de morceaux')
     .setDMPermission(false)
-    .addSubcommand(askSubcommand.builder)
-    .addSubcommand(editSubcommand.builder)
+    .addSubcommand(addSubcommand.builder)
     .addSubcommand(deleteSubcommand.builder)
-    .addSubcommand(listSubcommand.builder),
+    .addSubcommand(listSubcommand.builder)
+    .addSubcommand(searchSubcommand.builder),
 
   async execute (interaction) {
     const subcommand = interaction.options.getSubcommand();
 
-    // Check role permissions for all subcommands
     if (!config.reqRoleId || !interaction.member.roles.cache.has(config.reqRoleId)) {
       return await interaction.reply({
-        content: '❌ Tu n\'as pas l\'autorisation d\'utiliser cette commande.',
+        content: 'Tu n\'as pas l\'autorisation d\'utiliser cette commande.',
         ephemeral: true
       });
     }
 
     switch (subcommand) {
-    case 'ask':
-      return await askSubcommand.execute(interaction);
-    case 'edit':
-      return await editSubcommand.execute(interaction);
+    case 'add':
+      return await addSubcommand.execute(interaction);
     case 'delete':
       return await deleteSubcommand.execute(interaction);
     case 'list':
       return await listSubcommand.execute(interaction);
+    case 'search':
+      return await searchSubcommand.execute(interaction);
     default:
       return await interaction.reply({
-        content: '❌ Sous-commande inconnue.',
+        content: 'Sous-commande inconnue.',
         ephemeral: true
       });
     }

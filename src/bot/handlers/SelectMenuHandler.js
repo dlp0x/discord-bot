@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 // ========================================
 // bot/events/handlers/SelectMenuHandler.js - Gestion des menus de sélection
 // ========================================
@@ -10,6 +11,6 @@ export async function handleSelectMenu (_interaction, _client, _db, _config) {
   return {
     success: true,
     message: '✅ Sélection effectuée avec succès!',
-    ephemeral: true
+    flags: MessageFlags.Ephemeral
   };
 }

@@ -51,6 +51,18 @@ function getCommandFiles (dirPath, basePath = '') {
  * @returns {Object} Résultat de validation
  */
 function validateCommandModule (commandModule, fileName) {
+  const isHelperModule
+    = typeof commandModule.buildConfigGroup === 'function'
+      || typeof commandModule.buildReloadGroup === 'function'
+      || typeof commandModule.buildDebugGroup === 'function'
+      || typeof commandModule.handleConfigGroup === 'function'
+      || typeof commandModule.handleReloadGroup === 'function'
+      || typeof commandModule.handleDebugGroup === 'function';
+
+  if (isHelperModule) {
+    return { valid: true, helper: true };
+  }
+
   if (!commandModule.default) {
     return { valid: false, error: `Pas d'export default dans ${fileName}` };
   }
@@ -117,9 +129,9 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
           continue;
         }
 
-        // Si c'est une sous-commande : on ne l'enregistre pas ici
-        if (validation.subcommand) {
-          logger.debug(`Sous-commande ignorée (chargée via parent) : ${relativePath}`);
+        // Si c'est une sous-commande/helper : on ne l'enregistre pas ici
+        if (validation.subcommand || validation.helper) {
+          logger.custom('IGNR', `Chargée via parent : ${relativePath}`);
           continue;
         }
 

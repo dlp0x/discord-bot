@@ -113,6 +113,8 @@ const envSchema = z.object({
   JSON_URL: optionalUrlSchema(),
   AIRTABLE_API_KEY: optionalStringSchema(),
   AIRTABLE_BASE_ID: optionalStringSchema(),
+  RADIODJ_API_URL: optionalUrlSchema(),
+  RADIODJ_API_KEY: optionalStringSchema(),
   API_TOKEN: optionalStringSchema(),
   API_PORT: numericStringWithDefault('3000').default('3000'),
   LOG_LEVEL: z
@@ -175,6 +177,8 @@ function buildConfig () {
     JSON_URL: env.JSON_URL,
     AIRTABLE_API_KEY: env.AIRTABLE_API_KEY,
     AIRTABLE_BASE_ID: env.AIRTABLE_BASE_ID,
+    RADIODJ_API_URL: env.RADIODJ_API_URL,
+    RADIODJ_API_KEY: env.RADIODJ_API_KEY,
 
     API_TOKEN: env.API_TOKEN,
     API_PORT: env.API_PORT,
@@ -231,7 +235,9 @@ function buildConfig () {
       token: env.API_TOKEN,
       unsplashKey: env.UNSPLASH_ACCESS_KEY,
       streamUrl: env.STREAM_URL,
-      jsonUrl: env.JSON_URL
+      jsonUrl: env.JSON_URL,
+      radioDjUrl: env.RADIODJ_API_URL,
+      radioDjKey: env.RADIODJ_API_KEY
     },
 
     hasAirtable () {
@@ -267,7 +273,9 @@ function buildConfig () {
     'STREAM_URL',
     'JSON_URL',
     'AIRTABLE_API_KEY',
-    'AIRTABLE_BASE_ID'
+    'AIRTABLE_BASE_ID',
+    'RADIODJ_API_URL',
+    'RADIODJ_API_KEY'
   ].filter((key) => !config[key]);
 
   if (missingOptionalVars.length > 0 && config.NODE_ENV !== 'test') {

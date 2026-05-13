@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 // ========================================
 // bot/events/handlers/ChatInputHandler.js - Gestion des commandes slash
 // ========================================
@@ -42,7 +43,7 @@ export async function handleChatInputCommand (interaction, _client, _db, _config
       return {
         success: false,
         message: `❌ Erreur lors de l'exécution de la commande ${commandName}.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       };
     }
   }

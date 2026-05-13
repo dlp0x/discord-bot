@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 // ========================================
 // bot/events/handlers/InteractionHandler.js - Handler amélioré pour les interactions
 // ========================================
@@ -54,7 +55,7 @@ export async function handleInteractionByType (interaction, client, db, config) 
     return {
       success: false,
       message: '❌ Type d\'interaction non supporté.',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   } catch (error) {
     logger.error(
@@ -64,7 +65,7 @@ export async function handleInteractionByType (interaction, client, db, config) 
     return {
       success: false,
       message: '❌ Erreur lors du traitement de l\'interaction.',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   }
 }
@@ -94,7 +95,7 @@ async function handleSlashCommand (interaction, client, db, config) {
       return {
         success: false,
         message: `❌ La commande "${commandName}" n'existe pas.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       };
     }
 
@@ -106,7 +107,7 @@ async function handleSlashCommand (interaction, client, db, config) {
       return {
         success: false,
         message: `❌ Erreur de configuration de la commande "${commandName}".`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       };
     }
 
@@ -143,7 +144,7 @@ async function handleSlashCommand (interaction, client, db, config) {
     return {
       success: false,
       message: `❌ Erreur lors de l'exécution de la commande ${commandName}.`,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   }
 }
@@ -194,7 +195,7 @@ async function handleButton (interaction) {
     return {
       success: false,
       message: '❌ Erreur lors du traitement du bouton.',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   }
 }
@@ -217,7 +218,7 @@ async function handleSelectMenu (interaction) {
     // Exemple de traitement de select menu
     await interaction.reply({
       content: `Vous avez sélectionné: ${selectedValues.join(', ')}`,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
 
     return { success: true, message: 'SELECT_MENU_HANDLED' };
@@ -229,7 +230,7 @@ async function handleSelectMenu (interaction) {
     return {
       success: false,
       message: '❌ Erreur lors du traitement de la sélection.',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   }
 }
@@ -266,7 +267,7 @@ async function handleModal (interaction) {
     // Exemple de traitement
     await interaction.reply({
       content: '✅ Formulaire soumis avec succès!',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
 
     return { success: true, message: 'MODAL_HANDLED' };
@@ -275,7 +276,7 @@ async function handleModal (interaction) {
     return {
       success: false,
       message: '❌ Erreur lors du traitement du formulaire.',
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     };
   }
 }

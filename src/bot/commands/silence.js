@@ -1,6 +1,6 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import getSilenceDetector from '../../../core/services/SilenceDetector.js';
-import logger from '../../logger.js';
+import {SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
+import getSilenceDetector from '../../core/services/SilenceDetector.js';
+import logger from '../logger.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -91,7 +91,7 @@ export default {
       default:
         await interaction.reply({
           content: '❌ Sous-commande non reconnue',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
     } catch (error) {
@@ -99,7 +99,7 @@ export default {
       await interaction.reply({
         content:
           '❌ Une erreur est survenue lors de l\'exécution de la commande',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   },
@@ -292,7 +292,7 @@ export default {
       await interaction.reply({
         content:
           '❌ Le détecteur de silence n\'est pas actif. Utilisez `/silence start` pour le démarrer.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
       return;
     }
@@ -322,14 +322,14 @@ export default {
         await interaction.reply({
           content:
             '❌ Impossible d\'envoyer le test - Client Discord non disponible',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
     } catch (error) {
       logger.error('Erreur lors du test d\'alerte:', error);
       await interaction.reply({
         content: '❌ Erreur lors de l\'envoi du test d\'alerte',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }
