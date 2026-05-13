@@ -33,7 +33,7 @@ export async function handleReloadGroup (subcommand, _interaction, context) {
     return {
       success: true,
       message:
-        `🔄 Commands reload\n`
+        '🔄 Commands reload\n'
         + `- before: ${before}\n`
         + `- after: ${after}\n`
         + `- loaded: ${result.loaded?.length || 0}\n`

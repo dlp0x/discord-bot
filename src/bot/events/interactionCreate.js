@@ -2,7 +2,7 @@
 // bot/events/interactionCreate.js - Point d'entrée principal pour les interactions Discord
 // ========================================
 
-import {Events, MessageFlags } from 'discord.js';
+import { Events, MessageFlags } from 'discord.js';
 import AppState from '../../core/services/AppState.js';
 import { RetryManager } from '../../utils/shared/retry.js';
 import { checkRateLimit, recordCommand } from '../../utils/shared/rateLimiter.js';
@@ -317,11 +317,11 @@ async function handleInteractionResponse (interaction, result, commandName) {
         = result.message && typeof result.message === 'object'
           ? result.message
           : {
-              content: result.message ?? result.content,
-              embeds: result.embeds,
-              components: result.components,
-              ephemeral: result.ephemeral !== false
-            };
+            content: result.message ?? result.content,
+            embeds: result.embeds,
+            components: result.components,
+            ephemeral: result.ephemeral !== false
+          };
       await interaction.reply({
         ...messagePayload,
         ephemeral:

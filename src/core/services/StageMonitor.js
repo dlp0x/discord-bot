@@ -46,7 +46,7 @@ class StageMonitor {
     }, this.checkInterval);
 
     logger.info(
-      `🎭 Surveillance des stages démarrée `
+      '🎭 Surveillance des stages démarrée '
       + `(intervalle: ${this.checkInterval / 1000}s, `
       + `grâce: ${this.disconnectGraceMs / 1000}s)`
     );
@@ -121,7 +121,7 @@ class StageMonitor {
 
         // Vérifier que la connexion est toujours sur le bon canal
         if (connection.joinConfig.channelId !== channelId) {
-          logger.debug(`🎤 Promotion ignorée: connexion sur un autre canal`);
+          logger.debug('🎤 Promotion ignorée: connexion sur un autre canal');
           return;
         }
 
@@ -309,7 +309,7 @@ class StageMonitor {
 
       // Bot rejoint un stage
       if (newState.channelId) {
-        const channel = newState.channel;
+        const { channel } = newState;
 
         if (channel?.type === 13) {
           logger.info(
