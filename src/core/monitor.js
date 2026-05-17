@@ -3,7 +3,7 @@
 // ========================================
 
 import { MessageFlags } from 'discord.js';
-import logger from '../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import appState from './services/AppState.js';
 import { generateErrorId } from '../utils/shared/generateErrorId.js';
 

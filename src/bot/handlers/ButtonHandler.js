@@ -2,7 +2,7 @@
 // bot/events/handlers/ButtonHandler.js - Gestion des interactions de boutons
 // ========================================
 
-import logger from '../logger.js';
+import logger from '../../shared/logging/logger.js';
 import { safeStringify } from '../utils/SafeStringify.js';
 
 /**

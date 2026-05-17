@@ -2,7 +2,7 @@
 // core/utils/retry.js - Utilitaire de retry générique
 // ========================================
 
-import logger from '../../bot/logger.js';
+import logger from '../../shared/logging/logger.js';
 
 export class RetryManager {
   constructor (options = {}) {

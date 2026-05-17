@@ -3,7 +3,7 @@
 // ========================================
 import os from "os";
 import { WebhookClient, EmbedBuilder } from "discord.js";
-import logger from "../../bot/logger.js";
+import logger from '#shared/logging/logger.js';
 
 class AlertManager {
   constructor() {

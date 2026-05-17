@@ -6,7 +6,7 @@ import { createClient } from './client.js';
 import config from './config.js';
 import { loadCommands } from './handlers/loadCommands.js';
 import { loadEvents } from './handlers/loadEvents.js';
-import logger from './logger.js';
+import logger from '#shared/logging/logger.js';
 import updateStatus from './tasks/updateStatus.js';
 import errorHandler from '../core/monitor.js';
 import stageMonitor from '../core/services/StageMonitor.js';

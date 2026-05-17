@@ -1,7 +1,7 @@
 import express from 'express';
 import botConfig from '../../bot/config.js';
 import { z } from 'zod';
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 const { VOICE_CHANNEL_ID, API_TOKEN, PLAYLIST_CHANNEL_ID } = botConfig;
 

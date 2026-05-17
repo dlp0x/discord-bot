@@ -7,7 +7,7 @@ import {
   StreamType
 } from '@discordjs/voice';
 import config from '../config.js';
-import logger from '../logger.js';
+import logger from '../../shared/logging/logger.js';
 
 // StreamType.Arbitrary indique à @discordjs/voice de ne pas tenter
 // de détecter/transcoder le format — évite le TimeoutNegativeWarning.

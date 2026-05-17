@@ -3,7 +3,7 @@ import { MessageFlags } from 'discord.js';
 // bot/events/handlers/InteractionHandler.js - Handler amélioré pour les interactions
 // ========================================
 
-import logger from '../logger.js';
+import logger from '../../shared/logging/logger.js';
 import { handleTempVcButton, handleTempVcModal, isTempVcButton } from '../services/tempVcService.js';
 const COMPACT_LOGS = process.env.COMPACT_LOGS === 'true';
 

@@ -3,7 +3,7 @@ import { MessageFlags } from 'discord.js';
 // bot/events/handlers/ChatInputHandler.js - Gestion des commandes slash
 // ========================================
 
-import logger from '../logger.js';
+import logger from '#shared/logging/logger.js';
 
 /**
  * Traiter une commande slash

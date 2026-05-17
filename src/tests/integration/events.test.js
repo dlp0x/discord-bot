@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import logger from "../../bot/logger.js";
+import logger from '#shared/logging/logger.js';
 
 // Mock Discord.js
 const mockClient = {

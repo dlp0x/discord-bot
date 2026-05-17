@@ -3,7 +3,7 @@
 // ========================================
 
 import express from 'express';
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import { z } from 'zod';
 import { getApiErrorMessage } from '../../core/monitor.js';
 import { requireApiToken } from '../middlewares/auth.js';

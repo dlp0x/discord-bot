@@ -4,7 +4,7 @@
 // ========================================
 
 import { getVoiceConnection } from '@discordjs/voice';
-import logger from '../../bot/logger.js';
+import logger from '../../shared/logging/logger.js';
 import stageSpeakerManager from './StageSpeakerManager.js';
 
 class StageMonitor {

@@ -7,7 +7,7 @@ import fs from 'fs';
 import WebServer from './api/index.js';
 import { startBot, stopBot } from './bot/startup.js';
 import config from './bot/config.js';
-import logger from './bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import logMemory from './bot/tasks/logMemory.js';
 import { registerProcessHandlers } from './core/lifecycle.js';
 import appState from './core/services/AppState.js';

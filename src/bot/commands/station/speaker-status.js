@@ -4,7 +4,7 @@
 
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 import stageSpeakerManager from '../../../core/services/StageSpeakerManager.js';
 
 export default {

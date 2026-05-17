@@ -2,7 +2,7 @@
 // core/utils/rateLimiter.js - Système de rate limiting pour Discord
 // ========================================
 
-import logger from "../../bot/logger.js";
+import logger from "../../shared/logging/logger.js";
 
 /**
  * Classe de rate limiting avec différents niveaux de limitation

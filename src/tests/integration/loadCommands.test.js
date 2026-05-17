@@ -22,7 +22,7 @@ vi.mock('../../bot/logger.js', () => ({
     debug: vi.fn(), // Ajout pour vérifier les sous-commandes ignorées
   },
 }));
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 describe('loadCommands', () => {
   let mockClient;

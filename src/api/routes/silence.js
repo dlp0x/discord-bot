@@ -4,7 +4,7 @@
 
 import express from 'express';
 import getSilenceDetector from '../../core/services/SilenceDetector.js';
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 export default function silenceRoutes (client, loggerInstance = logger) {
   const router = express.Router();

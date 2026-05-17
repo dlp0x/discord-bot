@@ -3,7 +3,7 @@
 // ========================================
 
 import { ChannelType, EmbedBuilder } from 'discord.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 import config from '../../config.js';
 
 export default {

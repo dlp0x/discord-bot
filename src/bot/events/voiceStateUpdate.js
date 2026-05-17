@@ -3,7 +3,7 @@
 // ========================================
 
 import { Events } from 'discord.js';
-import logger from '../logger.js';
+import logger from '#shared/logging/logger.js';
 import stageMonitor from '../../core/services/StageMonitor.js';
 import { handleJoinToCreate } from '../services/tempVcService.js';
 

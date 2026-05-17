@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import logger from '../logger.js';
+import logger from '#shared/logging/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

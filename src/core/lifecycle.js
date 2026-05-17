@@ -2,7 +2,7 @@
 // core/lifecycle.js
 // ========================================
 
-import logger from '../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import alertManager from '../utils/bot/alerts.js';
 import errorHandler from './monitor.js';
 

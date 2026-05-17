@@ -2,7 +2,7 @@ import StateStorage from './StateStorage.js';
 import StateNotifier from './StateNotifier.js';
 import StateHealthChecker from './StateHealthChecker.js';
 import { startMetricsPolling, stopMetricsPolling } from './metrics.js';
-import logger from '../../bot/logger.js';
+import logger from '../../shared/logging/logger.js';
 
 class AppStateService {
   #storage = new StateStorage();

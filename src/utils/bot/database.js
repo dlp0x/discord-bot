@@ -4,7 +4,7 @@
 
 import path from "path";
 import { fileURLToPath } from "url";
-import logger from "../../bot/logger.js";
+import logger from "../../shared/logging/logger.js";
 import appState from "../../core/services/AppState.js";
 import { retryDatabase } from "../shared/retry.js";
 

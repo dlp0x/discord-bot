@@ -3,7 +3,7 @@
 // ========================================
 
 import axios from 'axios';
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import config from '../../bot/config.js';
 import cache from '../../utils/bot/cache.js';
 

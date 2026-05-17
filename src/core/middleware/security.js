@@ -4,7 +4,7 @@
 
 import rateLimiter from '../../utils/shared/rateLimiter.js';
 import validator from '../../utils/shared/validation.js';
-import { secureLogger } from '../../utils/shared/secureLogger.js';
+import { secureLogger } from '#shared/logging/secureLogger.js';
 
 /**
  * Middleware de validation des entrées

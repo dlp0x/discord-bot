@@ -3,7 +3,7 @@ import { validateURL } from '../../../utils/bot/validateURL.js';
 import { genres } from '../../../utils/bot/genres.js';
 import { addRequest } from '../../../utils/bot/radioDjApi.js';
 import config from '../../config.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 export default {
   builder: (subcommand) =>

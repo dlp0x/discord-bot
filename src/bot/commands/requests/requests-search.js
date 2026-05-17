@@ -1,6 +1,6 @@
 import { MessageFlags } from 'discord.js';
 import { searchSongs } from '../../../utils/bot/radioDjApi.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 export default {
   builder: (subcommand) =>

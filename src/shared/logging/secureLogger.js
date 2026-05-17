@@ -2,7 +2,7 @@
 // core/utils/secureLogger.js - Système de logging sécurisé optimisé
 // ========================================
 
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 /**
  * Classe de logging sécurisé avec masquage intelligent des données sensibles

@@ -8,7 +8,7 @@ import {
   EmbedBuilder,
   MessageFlags
 } from 'discord.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -1,6 +1,6 @@
 import { MessageFlags } from 'discord.js';
 import { database as db } from '../../../utils/database/database.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 export default {
   builder: (subcommand) =>

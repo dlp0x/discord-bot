@@ -2,7 +2,7 @@
 // core/utils/validation.js - Système de validation et sanitization
 // ========================================
 
-import logger from '../../bot/logger.js';
+import logger from '../../shared/logging/logger.js';
 
 /**
  * Classe de validation et sanitization des entrées utilisateur

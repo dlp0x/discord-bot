@@ -3,7 +3,7 @@
 // ========================================
 
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
-import logger from './logger.js';
+import logger from '#shared/logging/logger.js';
 
 class DiscordClientSingleton {
   #client = null;

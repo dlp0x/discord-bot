@@ -3,7 +3,7 @@
 // ========================================
 
 import { PermissionFlagsBits } from 'discord.js';
-import logger from '../../bot/logger.js';
+import logger from '../../shared/logging/logger.js';
 
 class StageSpeakerManager {
   #promotingGuilds = new Set();

@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "../../bot/config.js";
-import logger from "../../bot/logger.js";
+import logger from '#shared/logging/logger.js';
 
 const { JSON_URL } = config;
 

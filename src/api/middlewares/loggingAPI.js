@@ -1,5 +1,5 @@
 // api/middlewares/loggingAPI.js
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 export default function loggingAPI () {
   return (req, res, next) => {

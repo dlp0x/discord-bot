@@ -1,6 +1,6 @@
 // tests/logger.test.js
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
-import logger from '../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 describe('PerformanceLogger', () => {
   let stdoutSpy;

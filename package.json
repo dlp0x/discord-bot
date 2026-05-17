@@ -99,5 +99,11 @@
     "context": "node ./scripts/tools/projectContext.js",
     "context:md": "node ./scripts/tools/projectContext.js --md",
     "context:full": "node ./scripts/tools/projectContext.js --md --full"
+  },
+  "imports": {
+    "#shared/*": "./src/shared/*",
+    "#core/*": "./src/core/*",
+    "#bot/*": "./src/bot/*",
+    "#api/*": "./src/api/*"
   }
 }

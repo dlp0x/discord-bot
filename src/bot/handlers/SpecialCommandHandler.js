@@ -2,7 +2,7 @@
 // bot/events/handlers/SpecialCommandHandler.js - Gestion des commandes spéciales
 // ========================================
 
-import logger from '../logger.js';
+import logger from '../../shared/logging/logger.js';
 import stageMonitor from '../../core/services/StageMonitor.js';
 import stageSpeakerManager from '../../core/services/StageSpeakerManager.js';
 

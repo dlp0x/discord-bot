@@ -3,7 +3,7 @@
 // Cache en memoire simple, TTL et stats
 // ========================================
 
-import logger from '../logger.js';
+import logger from '../../shared/logging/logger.js';
 
 class CacheManager {
   constructor ({ defaultTtlMs = 60_000 } = {}) {

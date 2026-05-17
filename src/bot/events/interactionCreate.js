@@ -10,8 +10,8 @@ import {
   secureLogger,
   secureAudit,
   secureSecurityAlert
-} from '../../utils/shared/secureLogger.js';
-import logger from '../logger.js';
+} from '../../shared/logging/secureLogger.js';
+import logger from '../../shared/logging/logger.js';
 import CommandHandler from '../handlers/CommandHandler.js';
 import config from '../config.js';
 import { createServices } from '../services/ServiceManager.js';
