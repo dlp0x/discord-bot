@@ -4,9 +4,9 @@
 
 import path from "path";
 import { fileURLToPath } from "url";
-import logger from "../../shared/logging/logger.js";
+import logger from "#shared/logging/logger.js";
 import appState from "../../core/services/AppState.js";
-import { retryDatabase } from "../shared/retry.js";
+import { retryDatabase } from "#core/services/retry.js";
 
 // Fallback: better-sqlite3 (synchrone, mutex JS)
 import Database from "better-sqlite3";

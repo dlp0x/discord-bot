@@ -3,7 +3,7 @@
 // ========================================
 
 import express from 'express';
-import alertManager from '../../utils/bot/alerts.js';
+import alertManager from '#core/services/AlertManager.js';
 import { z } from 'zod';
 import { getApiErrorMessage } from '../../core/monitor.js';
 import { requireApiToken } from '../middlewares/auth.js';

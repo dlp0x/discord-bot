@@ -16,7 +16,7 @@ import {
   timeoutProtection
 } from '../core/middleware/security.js';
 import prometheusMiddleware from './middlewares/prometheus.js';
-import { generateErrorId } from '../utils/shared/generateErrorId.js';
+import { generateErrorId } from '#shared/utils/generateErrorId.js';
 
 class WebServer {
   constructor (client, logger) {

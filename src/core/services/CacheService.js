@@ -1,5 +1,5 @@
 // ========================================
-// utils/bot/cache.js - Système de cache en mémoire avec TTL
+// utils/bot/cacheManager.js - Système de cache en mémoire avec TTL
 // ========================================
 
 import logger from '#shared/logging/logger.js';

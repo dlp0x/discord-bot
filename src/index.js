@@ -4,15 +4,15 @@
 
 import 'dotenv/config';
 import fs from 'fs';
-import WebServer from './api/index.js';
+import WebServer from '#api/index.js';
 import { startBot, stopBot } from './bot/startup.js';
 import config from './bot/config.js';
 import logger from '#shared/logging/logger.js';
 import logMemory from './bot/tasks/logMemory.js';
-import { registerProcessHandlers } from './core/lifecycle.js';
-import appState from './core/services/AppState.js';
-import { database } from './utils/database/database.js';
-import { retryDiscord, retry } from './utils/shared/retry.js';
+import { registerProcessHandlers } from '#core/lifecycle.js';
+import appState from '#core/services/AppState.js';
+import { database } from '#shared/database/databaseMock.js';
+import { retryDiscord, retry } from '#core/services/retry.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf-8'));
 

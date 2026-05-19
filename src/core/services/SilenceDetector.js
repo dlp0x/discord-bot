@@ -5,7 +5,7 @@
 import axios from 'axios';
 import logger from '#shared/logging/logger.js';
 import config from '../../bot/config.js';
-import cache from '../../utils/bot/cache.js';
+import cache from '#core/services/CacheService.js';
 
 class SilenceDetector {
   constructor () {

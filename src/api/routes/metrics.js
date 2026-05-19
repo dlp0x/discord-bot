@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import os from 'os';
-import metricsCollector from '../../utils/bot/metrics.js';
+import metricsCollector from '#core/services/MetricsCollector.js';
 
 export default (client, logger) => {
   const router = Router();

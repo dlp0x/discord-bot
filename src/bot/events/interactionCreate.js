@@ -3,27 +3,27 @@
 // ========================================
 
 import { Events, MessageFlags } from 'discord.js';
-import AppState from '../../core/services/AppState.js';
-import { RetryManager } from '../../utils/shared/retry.js';
-import { checkRateLimit, recordCommand } from '../../utils/shared/rateLimiter.js';
+import AppState from '#core/services/AppState.js';
+import { RetryManager } from "#core/services/retry.js";
+import { checkRateLimit, recordCommand } from "#core/services/rateLimiter.js";
 import {
-  secureLogger,
   secureAudit,
   secureSecurityAlert
-} from '../../shared/logging/secureLogger.js';
-import logger from '../../shared/logging/logger.js';
-import CommandHandler from '../handlers/CommandHandler.js';
+} from '#shared/logging/secureLogger.js';
+import secureLogger from '#shared/logging/secureLogger.js';
+import logger from '#shared/logging/logger.js';
+import CommandHandler from '#bot/handlers/CommandHandler.js';
 import config from '../config.js';
-import { createServices } from '../services/ServiceManager.js';
+import { createServices } from '#bot/services/ServiceManager.js';
 
 // Mode logs compacts: ne garder que start/success et erreurs
 const COMPACT_LOGS = process.env.COMPACT_LOGS === 'true';
 
 // Import des handlers spécialisés
-import { validateInteractionInput } from '../handlers/ValidationHandler.js';
-import { handleInteractionByType } from '../handlers/InteractionHandler.js';
-import { getCommandType } from '../handlers/CommandTypeHandler.js';
-// import { safeStringify } from './utils/SafeStringify.js';
+import { validateInteractionInput } from '#bot/handlers/ValidationHandler.js';
+import { handleInteractionByType } from '#bot/handlers/InteractionHandler.js';
+import { getCommandType } from '#bot/handlers/CommandTypeHandler.js';
+
 
 // Instance de RetryManager pour les interactions Discord
 const interactionRetryManager = new RetryManager({

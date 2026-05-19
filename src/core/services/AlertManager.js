@@ -25,7 +25,7 @@ class AlertManager {
       logger.info("🔔 Système d'alertes webhook initialisé");
     }
     logger.banner("Initialisation du bot Discord...");
-    logger.custom("INIT","Système d'alertes initialisé");
+    logger.init("Système d'alertes initialisé");
   }
 
   /**

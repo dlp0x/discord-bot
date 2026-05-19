@@ -5,7 +5,7 @@
 import { MessageFlags } from 'discord.js';
 import logger from '#shared/logging/logger.js';
 import appState from './services/AppState.js';
-import { generateErrorId } from '../utils/shared/generateErrorId.js';
+import { generateErrorId } from '#shared/utils/generateErrorId.js';
 
 class Monitor {
   constructor (loggerInstance = logger) {

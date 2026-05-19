@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import logger from '../../shared/logging/logger.js';
+import logger from '#shared/logging/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -131,7 +131,7 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
 
         // Si c'est une sous-commande/helper : on ne l'enregistre pas ici
         if (validation.subcommand || validation.helper) {
-          logger.custom('IGNR', `Chargée via parent : ${relativePath}`);
+          logger.info(`↳ Chargée via parent : ${relativePath}`);
           continue;
         }
 
@@ -153,7 +153,7 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
         categories[category].push(commandName);
 
         loadedCommands.push({ name: commandName, file: relativePath, category });
-        logger.custom('CMD', `${commandName} (${category})`);
+        logger.info(`${commandName} (${category})`);
       } catch (error) {
         const errorMsg = `Erreur lors du chargement de ${relativePath}: ${error.message}`;
         logger.error(errorMsg);
@@ -166,7 +166,7 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
     if (Object.keys(categories).length > 0) {
       logger.info('Répartition par catégorie:');
       for (const [cat, commands] of Object.entries(categories)) {
-        logger.custom('CAT', `${cat}: ${commands.length} commande(s)`);
+        logger.info(`${cat}: ${commands.length} commande(s)`);
       }
     }
 

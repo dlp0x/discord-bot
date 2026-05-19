@@ -4,12 +4,12 @@
 
 import { createClient } from './client.js';
 import config from './config.js';
-import { loadCommands } from './handlers/loadCommands.js';
-import { loadEvents } from './handlers/loadEvents.js';
+import { loadCommands } from '#bot/bootstrap/loadCommands.js';
+import { loadEvents } from '#bot/bootstrap/loadEvents.js';
 import logger from '#shared/logging/logger.js';
 import updateStatus from './tasks/updateStatus.js';
-import errorHandler from '../core/monitor.js';
-import stageMonitor from '../core/services/StageMonitor.js';
+import errorHandler from '#core/monitor.js';
+import stageMonitor from '#core/services/StageMonitor.js';
 
 let client = null;
 let updateStatusInterval = null;

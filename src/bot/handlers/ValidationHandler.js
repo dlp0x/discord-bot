@@ -6,7 +6,7 @@ import {
   validateSuggestion,
   validateDiscordId,
   sanitizeString
-} from '../../utils/shared/validation.js';
+} from '#shared/validation/validation.js';
 
 /**
    * Valider et sanitiser les entrées de l'interaction

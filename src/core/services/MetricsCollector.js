@@ -101,7 +101,7 @@ class MetricsCollector {
     // Collecter les métriques par défaut du système
     collectDefaultMetrics({ register: this.register });
 
-    logger.custom("INIT", "Système de métriques Prometheus initialisé");
+    logger.init("Système de métriques Prometheus initialisé");
   }
 
   /**

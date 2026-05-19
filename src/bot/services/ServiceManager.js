@@ -3,7 +3,7 @@
 // Conteneur de services extensible (singleton-friendly)
 // ========================================
 
-import cache from './CacheManager.js';
+import cache from '#core/services/CacheService.js';
 import * as radio from './radioPlaybackService.js';
 import stageMonitor from '../../core/services/StageMonitor.js';
 

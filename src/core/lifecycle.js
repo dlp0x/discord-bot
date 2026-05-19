@@ -3,7 +3,7 @@
 // ========================================
 
 import logger from '#shared/logging/logger.js';
-import alertManager from '../utils/bot/alerts.js';
+import alertManager from '#core/services/AlertManager.js';
 import errorHandler from './monitor.js';
 
 export function registerProcessHandlers ({ gracefulShutdown }) {

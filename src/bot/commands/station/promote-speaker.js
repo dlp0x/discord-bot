@@ -5,7 +5,7 @@
 import { ChannelType } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 import logger from '#shared/logging/logger.js';
-import stageSpeakerManager from '../../../core/services/StageSpeakerManager.js';
+import stageSpeakerManager from '#core/services/StageSpeakerManager.js';
 
 export default {
   builder: (subcommand) =>

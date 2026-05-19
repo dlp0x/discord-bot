@@ -1,6 +1,6 @@
 import { getVoiceConnection } from '@discordjs/voice';
 import logger from '#shared/logging/logger.js';
-import stageMonitor from '../../../core/services/StageMonitor.js';
+import stageMonitor from '#core/services/StageMonitor.js';
 
 const builder = (subcommand) =>
   subcommand

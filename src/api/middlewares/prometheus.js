@@ -1,5 +1,5 @@
 // middlewares/prometheusMiddleware.js
-import metrics from '../../utils/bot/metrics.js';
+import metrics from '#core/services/MetricsCollector.js';
 import logger from '#shared/logging/logger.js';
 export default function prometheusMiddleware (req, res, next) {
   const start = Date.now();

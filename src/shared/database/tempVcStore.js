@@ -1,5 +1,5 @@
-import { db } from '../../utils/bot/database.js';
-import logger from '../../shared/logging/logger.js';
+import { db } from '#shared/database/database.js';
+import logger from '#shared/logging/logger.js';
 
 let isInitialized = false;
 

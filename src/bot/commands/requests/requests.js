@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
-import { validateURL } from '../../../utils/bot/validateURL.js';
-import { genres } from '../../../utils/bot/genres.js';
-import { addRequest } from '../../../utils/bot/radioDjApi.js';
+import { validateURL } from '#shared/validation/validateURL.js';
+import { genres } from '#shared/utils/genres.js';
+import { addRequest } from '#core/services/radioDjApi.js';
 import config from '../../config.js';
 import logger from '#shared/logging/logger.js';
 
