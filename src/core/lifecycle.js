@@ -21,6 +21,14 @@ export function registerProcessHandlers ({ gracefulShutdown }) {
     shutdownWithFallback('SIGTERM');
   });
 
+  process.once('SIGUSR2', async () => {
+    logger.warn('Signal SIGUSR2 reçu.');
+  
+    await gracefulShutdown('SIGUSR2');
+  
+    process.kill(process.pid, 'SIGUSR2');
+  });
+
   process.on('unhandledRejection', (reason) => {
     if (reason?.message?.includes('Shard 0 not found')) {
       logger.warn('Shard non trouvé à la fermeture. Pas de panique.');

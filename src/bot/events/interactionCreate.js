@@ -6,11 +6,7 @@ import { Events, MessageFlags } from 'discord.js';
 import AppState from '#core/services/AppState.js';
 import { RetryManager } from "#core/services/retry.js";
 import { checkRateLimit, recordCommand } from "#core/services/rateLimiter.js";
-import {
-  secureAudit,
-  secureSecurityAlert
-} from '#shared/logging/secureLogger.js';
-import secureLogger from '#shared/logging/secureLogger.js';
+import { secureError, secureAudit, secureSecurityAlert, securePerformance } from '#shared/logging/secureLogger.js';
 import logger from '#shared/logging/logger.js';
 import CommandHandler from '#bot/handlers/CommandHandler.js';
 import config from '../config.js';
@@ -128,7 +124,7 @@ export default {
 
       // Log de performance + fin concise
       const duration = Date.now() - startTime;
-      secureLogger.securePerformance(`Interaction ${commandName}`, duration, {
+      securePerformance(`Interaction ${commandName}`, duration, {
         userId,
         commandType,
         success: true
@@ -354,7 +350,7 @@ async function handleInteractionError (interaction, error, startTime) {
   const duration = Date.now() - startTime;
 
   // Log d'erreur sécurisé
-  secureLogger.secureError('Erreur lors du traitement d\'interaction', error, {
+  secureError('Erreur lors du traitement d\'interaction', error, {
     userId: interaction?.user?.id,
     commandName: interaction?.commandName || interaction?.customId,
     interactionType: interaction?.type,

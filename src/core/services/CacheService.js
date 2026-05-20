@@ -65,7 +65,6 @@ class Cache {
     }
 
     this.stats.hits++;
-    logger.debug(`Cache HIT: ${key}`);
     return item.value;
   }
 
