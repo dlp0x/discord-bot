@@ -418,7 +418,7 @@ class Monitor {
     const messages = {
       SERVER_521: '🔧 Le serveur est temporairement indisponible. Redemarrage automatique en cours...',
       NETWORK:
-        '🌐 Probleme de connexion reseau. Reessayez dans quelques instants.',
+        '🌐 Problème de connexion réseau. Réessayez dans quelques instants.',
       PERMISSION: '🔒 Permissions insuffisantes pour cette action.',
       AUTH: '🔑 Erreur d\'authentification. Contactez un administrateur.',
       RATE_LIMIT: '⏱️ Trop de requêtes. Attendez un moment avant de reessayer.',
@@ -509,7 +509,7 @@ class Monitor {
    * Envoie une alerte critique
    */
   sendCriticalAlert (error, errorId, context) {
-    this.logger.error(`🚨 ALERTE CRITIQUE [${context}]: ${errorId}`);
+    this.logger.error(`🚨 ALERTE CRITIQUE [${context}]: ${errorId} - ${error.message}`);
     // Ici on pourrait envoyer une notification immediate
   }
 
