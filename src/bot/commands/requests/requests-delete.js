@@ -1,5 +1,5 @@
 import { MessageFlags } from 'discord.js';
-import { database as db } from '#shared/database/databaseMock.js';
+import { db } from '#shared/database/database.js';
 import logger from '#shared/logging/logger.js';
 
 export default {
@@ -50,4 +50,3 @@ export default {
     }
   }
 };
-
