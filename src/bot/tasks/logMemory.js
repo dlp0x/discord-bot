@@ -1,5 +1,5 @@
 // tasks/logMemory.js
-import logger from '../logger.js';
+import logger from '#shared/logging/logger.js';
 
 function formatBytes (bytes) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;

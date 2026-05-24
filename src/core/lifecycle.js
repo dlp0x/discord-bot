@@ -2,8 +2,8 @@
 // core/lifecycle.js
 // ========================================
 
-import logger from '../bot/logger.js';
-import alertManager from '../utils/bot/alerts.js';
+import logger from '#shared/logging/logger.js';
+import alertManager from '#core/services/AlertManager.js';
 import errorHandler from './monitor.js';
 
 export function registerProcessHandlers ({ gracefulShutdown }) {
@@ -19,6 +19,14 @@ export function registerProcessHandlers ({ gracefulShutdown }) {
   process.on('SIGTERM', () => {
     logger.warn('Signal SIGTERM reçu.');
     shutdownWithFallback('SIGTERM');
+  });
+
+  process.once('SIGUSR2', async () => {
+    logger.warn('Signal SIGUSR2 reçu.');
+  
+    await gracefulShutdown('SIGUSR2');
+  
+    process.kill(process.pid, 'SIGUSR2');
   });
 
   process.on('unhandledRejection', (reason) => {

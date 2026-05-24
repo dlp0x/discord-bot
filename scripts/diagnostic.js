@@ -98,7 +98,7 @@ try {
     
     // Vérifier les variables importantes
     const requiredVars = ['DISCORD_TOKEN', 'ADMIN_ROLE_ID'];
-    const optionalVars = ['AIRTABLE_API_KEY', 'AIRTABLE_BASE_ID'];
+    const optionalVars = [];
     
     console.log('\n   Variables requises :');
     requiredVars.forEach(varName => {

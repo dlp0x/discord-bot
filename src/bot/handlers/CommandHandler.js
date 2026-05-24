@@ -5,7 +5,7 @@ import { MessageFlags } from 'discord.js';
 // ========================================
 
 import config from '../config.js';
-import logger from '../logger.js';
+import logger from '../../shared/logging/logger.js';
 
 const DEFAULT_METADATA = {
   category: 'general',

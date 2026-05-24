@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import axios from 'axios';
 import config from '../../config.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 const { JSON_URL } = config;
 

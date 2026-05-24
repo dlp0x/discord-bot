@@ -3,9 +3,9 @@
 // ========================================
 
 import { MessageFlags } from 'discord.js';
-import logger from '../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import appState from './services/AppState.js';
-import { generateErrorId } from '../utils/shared/generateErrorId.js';
+import { generateErrorId } from '#shared/utils/generateErrorId.js';
 
 class Monitor {
   constructor (loggerInstance = logger) {
@@ -293,17 +293,7 @@ class Monitor {
       return;
     }
 
-    const errorId = generateErrorId();
 
-    this.logger.error(
-      `[${errorId}] ERREUR CRITIQUE [${context}]: ${error.message}`,
-      {
-        errorId,
-        context,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      }
-    );
 
     // Notification immédiate
     this.sendCriticalAlert(error, errorId, context);

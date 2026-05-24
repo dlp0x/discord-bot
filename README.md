@@ -60,8 +60,6 @@ LOG_LEVEL=info
 REQ_ROLE_ID=...
 REQ_CHANNEL_ID=...
 UNSPLASH_ACCESS_KEY=...
-AIRTABLE_API_KEY=...
-AIRTABLE_BASE_ID=...
 ```
 
 ## Demarrage
@@ -131,7 +129,6 @@ Base locale par defaut: `http://localhost:3000`
 - `GET /`
 - `GET /v1/health`
 - `GET /v1/metrics`
-- `GET /v1/metrics/prometheus`
 - `GET /v1/logs`
 - `GET/POST /v1/alerts`
 - `POST /v1/send-playlist`

@@ -4,15 +4,15 @@
 
 import 'dotenv/config';
 import fs from 'fs';
-import WebServer from './api/index.js';
+import WebServer from '#api/index.js';
 import { startBot, stopBot } from './bot/startup.js';
 import config from './bot/config.js';
-import logger from './bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import logMemory from './bot/tasks/logMemory.js';
-import { registerProcessHandlers } from './core/lifecycle.js';
-import appState from './core/services/AppState.js';
-import { database } from './utils/database/database.js';
-import { retryDiscord, retry } from './utils/shared/retry.js';
+import { registerProcessHandlers } from '#core/lifecycle.js';
+import appState from '#core/services/AppState.js';
+import { db as database } from '#shared/database/database.js';
+import { retryDiscord, retry } from '#core/services/retry.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf-8'));
 
@@ -41,7 +41,7 @@ async function gracefulShutdown (signal = 'UNKNOWN') {
       appState.setBotReady(false);
     }
 
-    await database.disconnect();
+    await database.connect();
     appState.setDatabaseConnected(false);
     appState.setDatabaseHealthy(false);
 
@@ -90,7 +90,7 @@ async function startApplication () {
     registerProcessHandlers({ gracefulShutdown });
 
     logger.api(
-      'Routes API disponibles : /v1/metrics, /v1/health, /v1/logs, /v1/alerts, /v1/send-playlist'
+      'Routes API disponibles : /v1/health, /v1/logs, /v1/alerts, /v1/send-playlist'
     );
     logMemory.execute();
     logger.banner('Bot pret. Logging en cours...');
