@@ -293,17 +293,7 @@ class Monitor {
       return;
     }
 
-    const errorId = generateErrorId();
 
-    this.logger.error(
-      `[${errorId}] ERREUR CRITIQUE [${context}]: ${error.message}`,
-      {
-        errorId,
-        context,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      }
-    );
 
     // Notification immédiate
     this.sendCriticalAlert(error, errorId, context);

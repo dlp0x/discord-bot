@@ -5,13 +5,13 @@
 import 'dotenv/config';
 import fs from 'fs';
 import WebServer from '#api/index.js';
-import { startBot, stopBot } from '#bot/startup.js';
-import config from '#bot/config.js';
+import { startBot, stopBot } from './bot/startup.js';
+import config from './bot/config.js';
 import logger from '#shared/logging/logger.js';
-import logMemory from '#bot/tasks/logMemory.js';
+import logMemory from './bot/tasks/logMemory.js';
 import { registerProcessHandlers } from '#core/lifecycle.js';
 import appState from '#core/services/AppState.js';
-import { database } from '#shared/database/databaseMock.js';
+import { db as database } from '#shared/database/database.js';
 import { retryDiscord, retry } from '#core/services/retry.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf-8'));
@@ -41,7 +41,7 @@ async function gracefulShutdown (signal = 'UNKNOWN') {
       appState.setBotReady(false);
     }
 
-    await database.disconnect();
+    await database.connect();
     appState.setDatabaseConnected(false);
     appState.setDatabaseHealthy(false);
 

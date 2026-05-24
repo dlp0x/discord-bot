@@ -4,7 +4,7 @@
 
 import { z } from 'zod';
 import logger from '#shared/logging/logger.js';
-import validator from '#shared/validation/validator.js';
+import validator from '#shared/validation/validation.js';
 
 // =========================
 // SCHEMAS (Zod reste ici)
