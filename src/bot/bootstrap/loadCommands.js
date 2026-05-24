@@ -1,5 +1,5 @@
 // ========================================
-// bot/handlers/loadCommands.js (ESM) - Version corrigée pour subcommands
+// bot/bootstrap/loadCommands.js (ESM) - Version corrigée pour subcommands
 // ========================================
 
 import fs from 'node:fs';
@@ -131,7 +131,7 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
 
         // Si c'est une sous-commande/helper : on ne l'enregistre pas ici
         if (validation.subcommand || validation.helper) {
-          logger.info(`↳ Chargée via parent : ${relativePath}`);
+          logger.cmd(`Chargée via parent : ${relativePath}`);
           continue;
         }
 
@@ -153,7 +153,7 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
         categories[category].push(commandName);
 
         loadedCommands.push({ name: commandName, file: relativePath, category });
-        logger.info(`${commandName} (${category})`);
+        logger.cmd(`${commandName} (${category})`);
       } catch (error) {
         const errorMsg = `Erreur lors du chargement de ${relativePath}: ${error.message}`;
         logger.error(errorMsg);
@@ -162,13 +162,6 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
     }
 
     logger.success(`${loadedCommands.length} commandes chargées avec succès`);
-
-    if (Object.keys(categories).length > 0) {
-      logger.info('Répartition par catégorie:');
-      for (const [cat, commands] of Object.entries(categories)) {
-        logger.info(`${cat}: ${commands.length} commande(s)`);
-      }
-    }
 
     if (failedCommands.length > 0) {
       logger.warn(`${failedCommands.length} commandes en échec:`);

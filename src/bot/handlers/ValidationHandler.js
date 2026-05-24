@@ -2,11 +2,7 @@
 // bot/events/handlers/ValidationHandler.js - Validation des interactions Discord
 // ========================================
 
-import {
-  validateSuggestion,
-  validateDiscordId,
-  sanitizeString
-} from '#shared/validation/validation.js';
+import validator from '#shared/validation/validation.js';
 
 /**
    * Valider et sanitiser les entrées de l'interaction
@@ -16,11 +12,11 @@ export async function validateInteractionInput (interaction) {
     const userId = interaction.user.id;
 
     // Validation de base
-    if (!validateDiscordId(userId)) {
+    if (!validator.validateDiscordId(userId)) {
       return { valid: false, error: 'ID utilisateur invalide' };
     }
 
-    if (interaction.guildId && !validateDiscordId(interaction.guildId)) {
+    if (interaction.guildId && !validator.validateDiscordId(interaction.guildId)) {
       return { valid: false, error: 'ID serveur invalide' };
     }
 
@@ -146,7 +142,7 @@ function validateModerationCommand (interaction, options) {
 
   const reason = options.getString('reason');
   if (reason) {
-    const sanitizedReason = sanitizeString(reason, { maxLength: 500 });
+    const sanitizedReason = validator.sanitize(reason, { maxLength: 500 });
     options._hoistedOptions = options._hoistedOptions.map((opt) =>
       opt.name === 'reason' ? { ...opt, value: sanitizedReason } : opt);
   }
@@ -166,7 +162,7 @@ function validateConfigCommand (interaction, options) {
   }
 
   if (configValue) {
-    const sanitizedValue = sanitizeString(configValue, { maxLength: 1000 });
+    const sanitizedValue = validator.sanitize(configValue, { maxLength: 1000 });
     options._hoistedOptions = options._hoistedOptions.map((opt) =>
       opt.name === 'value' ? { ...opt, value: sanitizedValue } : opt);
   }

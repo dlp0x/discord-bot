@@ -101,7 +101,6 @@ const envSchema = z.object({
     .default('dev'),
   DISCORD_TOKEN: z.string().min(1, 'DISCORD_TOKEN est requis'),
   ADMIN_ROLE_ID: z.string().min(1, 'ADMIN_ROLE_ID est requis'),
-  VOICE_CHANNEL_ID: z.string().min(1, 'VOICE_CHANNEL_ID est requis'),
   PLAYLIST_CHANNEL_ID: z.string().min(1, 'PLAYLIST_CHANNEL_ID est requis'),
   BOT_ROLE_NAME: z.string().default('soundSHINE'),
   DEV_GUILD_ID: optionalStringSchema(),
@@ -111,8 +110,6 @@ const envSchema = z.object({
   UNSPLASH_ACCESS_KEY: optionalStringSchema(),
   STREAM_URL: optionalUrlSchema(),
   JSON_URL: optionalUrlSchema(),
-  AIRTABLE_API_KEY: optionalStringSchema(),
-  AIRTABLE_BASE_ID: optionalStringSchema(),
   RADIODJ_API_URL: optionalUrlSchema(),
   RADIODJ_API_KEY: optionalStringSchema(),
   API_TOKEN: optionalStringSchema(),
@@ -165,7 +162,6 @@ function buildConfig () {
     DISCORD_TOKEN: env.DISCORD_TOKEN,
     BOT_TOKEN: env.BOT_TOKEN || env.DISCORD_TOKEN,
     ADMIN_ROLE_ID: env.ADMIN_ROLE_ID,
-    VOICE_CHANNEL_ID: env.VOICE_CHANNEL_ID,
     PLAYLIST_CHANNEL_ID: env.PLAYLIST_CHANNEL_ID,
     BOT_ROLE_NAME: env.BOT_ROLE_NAME,
     DEV_GUILD_ID: env.DEV_GUILD_ID,
@@ -175,8 +171,6 @@ function buildConfig () {
     UNSPLASH_ACCESS_KEY: env.UNSPLASH_ACCESS_KEY,
     STREAM_URL: env.STREAM_URL,
     JSON_URL: env.JSON_URL,
-    AIRTABLE_API_KEY: env.AIRTABLE_API_KEY,
-    AIRTABLE_BASE_ID: env.AIRTABLE_BASE_ID,
     RADIODJ_API_URL: env.RADIODJ_API_URL,
     RADIODJ_API_KEY: env.RADIODJ_API_KEY,
 
@@ -203,8 +197,8 @@ function buildConfig () {
     SILENCE_ALERT_CHANNEL_ID: env.SILENCE_ALERT_CHANNEL_ID,
     ADMIN_USER_ID: env.ADMIN_USER_ID,
 
-    dbPath: env.DB_PATH || path.join(__dirname, '../databases/soundshine.sqlite'),
-    logsPath: path.join(__dirname, '../logs'),
+    dbPath: env.DB_PATH || path.join(__dirname, '../data/soundshine.sqlite'),
+    logsPath: path.join(__dirname, '../data/logs'),
     security: {
       corsOrigin: env.CORS_ORIGIN || '*',
       rateLimit: {
@@ -240,10 +234,6 @@ function buildConfig () {
       radioDjKey: env.RADIODJ_API_KEY
     },
 
-    hasAirtable () {
-      return !!(this.AIRTABLE_API_KEY && this.AIRTABLE_BASE_ID);
-    },
-
     hasUnsplash () {
       return !!this.UNSPLASH_ACCESS_KEY;
     },
@@ -254,15 +244,13 @@ function buildConfig () {
 
     validateServices () {
       const services = {
-        airtable: this.hasAirtable(),
         unsplash: this.hasUnsplash(),
         streaming: this.hasStreamService()
       };
 
       logger.banner('État des services :');
-      logger.info(`   Airtable: ${services.airtable ? '✅ Configuré' : '❌ Non configuré'}`);
-      logger.info(`   Unsplash: ${services.unsplash ? '✅ Configuré' : '❌ Non configuré'}`);
-      logger.info(`   Streaming: ${services.streaming ? '✅ Configuré' : '❌ Non configuré'}`);
+      logger.info(`Unsplash: ${services.unsplash ? 'Configuré' : 'Non configuré'}`);
+      logger.info(`Streaming: ${services.streaming ? 'Configuré' : 'Non configuré'}`);
 
       return services;
     }
@@ -272,8 +260,6 @@ function buildConfig () {
     'UNSPLASH_ACCESS_KEY',
     'STREAM_URL',
     'JSON_URL',
-    'AIRTABLE_API_KEY',
-    'AIRTABLE_BASE_ID',
     'RADIODJ_API_URL',
     'RADIODJ_API_KEY'
   ].filter((key) => !config[key]);

@@ -87,6 +87,7 @@ class Logger {
   error (...a) { this.log('ERROR', ...a); }
   success (...a) { this.log('SUCCESS', ...a); }
   update (...a) { this.log('UPDATE', ...a); }
+  
   // =========================
   // DOMAIN LOGS
   // =========================

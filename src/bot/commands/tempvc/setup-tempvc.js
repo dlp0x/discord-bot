@@ -3,7 +3,7 @@ import { setupTempVc } from '../../services/tempVcService.js';
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('setup-tempvc')
+    .setName('vc-channels-setup')
     .setDescription('Configure le salon Join-to-Create pour les Temporary VC')
     .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)

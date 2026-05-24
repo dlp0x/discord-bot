@@ -56,17 +56,11 @@ export default (client, logger) => {
         lastActivity: new Date().toISOString()
       };
 
-      // Métriques réseau
-      const networkMetrics = {
-        requestTime: Date.now() - startTime,
-        timestamp: new Date().toISOString()
-      };
 
       const metrics = {
         system: systemMetrics,
         discord: discordMetrics,
         bot: botMetrics,
-        network: networkMetrics
       };
 
       // Log de l'accès aux métriques
@@ -84,34 +78,6 @@ export default (client, logger) => {
         message: 'Internal server error',
         timestamp: new Date().toISOString()
       });
-    }
-  });
-
-  /**
-   * GET /v1/metrics/prometheus
-   * Métriques au format Prometheus
-   */
-  router.get('/prometheus', async (req, res) => {
-    try {
-      // Mettre à jour les métriques avant de les récupérer
-      metricsCollector.updateDiscordMetrics(client);
-      metricsCollector.updateSystemMetrics();
-
-      const prometheusMetrics = await metricsCollector.getMetrics();
-
-      res.set('Content-Type', 'text/plain');
-      res.send(prometheusMetrics);
-
-      logger.custom(
-        'METRICS',
-        `Métriques Prometheus demandées par ${req.ip}`,
-        'cyan'
-      );
-    } catch (error) {
-      logger.error('Erreur route metrics Prometheus:', error);
-      res
-        .status(500)
-        .send('# Erreur lors de la récupération des métriques Prometheus\n');
     }
   });
 

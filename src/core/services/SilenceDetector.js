@@ -4,8 +4,9 @@
 
 import axios from 'axios';
 import logger from '#shared/logging/logger.js';
-import config from '../../bot/config.js';
+import config from '#bot/config.js';
 import cache from '#core/services/CacheService.js';
+import { getClient, isClientReady } from '#bot/client.js';
 
 class SilenceDetector {
   constructor () {
@@ -292,19 +293,17 @@ class SilenceDetector {
    */
   async getDiscordClient () {
     try {
-      // Essayer d'obtenir le client depuis AppState
-      const appState = (await import('./AppState.js')).default;
-      const state = appState.getFullState();
-
-      if (state.bot.isReady) {
-        // Le client devrait être disponible via le module principal
-        const { default: client } = await import('../../bot/client.js');
-        return client;
+      if (!isClientReady()) {
+        logger.error('Client Discord pas prêt');
+        return null;
       }
-
-      return null;
+  
+      return getClient();
     } catch (error) {
-      logger.error('Erreur lors de l\'obtention du client Discord:', error);
+      logger.error(
+        'Erreur lors de l\'obtention du client Discord:',
+        error
+      );
       return null;
     }
   }

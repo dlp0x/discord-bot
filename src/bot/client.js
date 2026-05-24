@@ -128,7 +128,7 @@ export function destroyClient () {
   return discordClientSingleton.destroy();
 }
 // Pour les tests uniquement (ne pas exporter en prod)
-// export function _resetDiscordClientForTests() { discordClientSingleton._resetForTests(); }
+ export function _resetDiscordClientForTests() { discordClientSingleton._resetForTests(); }
 
 export default discordClientSingleton;
 

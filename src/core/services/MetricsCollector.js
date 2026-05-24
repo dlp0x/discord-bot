@@ -1,5 +1,5 @@
 // ========================================
-// utils/metrics.js - Système de métriques Prometheus
+// utils/metrics.js - Système de métriques pour le bot Discord
 // ========================================
 
 import {
@@ -101,7 +101,7 @@ class MetricsCollector {
     // Collecter les métriques par défaut du système
     collectDefaultMetrics({ register: this.register });
 
-    logger.init("Système de métriques Prometheus initialisé");
+    logger.init("Système de métriques initialisé");
   }
 
   /**
@@ -246,7 +246,7 @@ class MetricsCollector {
   }
 
   /**
-   * Obtenir toutes les métriques au format Prometheus
+   * Obtenir toutes les métriques
    */
   async getMetrics() {
     try {

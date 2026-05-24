@@ -15,7 +15,7 @@ class StageSpeakerManager {
       PermissionFlagsBits.RequestToSpeak
     ];
 
-    logger.info('StageSpeakerManager initialisé');
+    logger.init('StageSpeakerManager initialisé');
   }
 
   /**

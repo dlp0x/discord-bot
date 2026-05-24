@@ -3,9 +3,9 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import corsMiddleware from './middlewares/cors.js';
 import helmetMiddleware from './middlewares/helmet.js';
-import loggingMiddleware from './middlewares/loggingAPI.js';
+import loggingMiddleware from '#shared/logging/api.js';
 import loadRoutes from './routes.js';
-import monitor from '../core/monitor.js';
+import monitor from '#core/monitor.js';
 import {
   validateInput,
   xssProtection,
@@ -15,7 +15,6 @@ import {
   dosProtection,
   timeoutProtection
 } from '../core/middleware/security.js';
-import prometheusMiddleware from './middlewares/prometheus.js';
 import { generateErrorId } from '#shared/utils/generateErrorId.js';
 
 class WebServer {
@@ -38,7 +37,6 @@ class WebServer {
       this.app.use(xssProtection);
       this.app.use(sqlInjectionProtection);
       this.app.use(validateInput);
-      this.app.use(prometheusMiddleware);
       // Rate limiting standard
       this.app.use(
         rateLimit({

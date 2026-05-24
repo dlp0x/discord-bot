@@ -1,5 +1,5 @@
 import express from 'express';
-import botConfig from '../../bot/config.js';
+import botConfig from '#bot/config.js';
 import { z } from 'zod';
 import logger from '#shared/logging/logger.js';
 

@@ -1,5 +1,5 @@
 // api/middlewares/loggingAPI.js
-import logger from '#shared/logging/logger.js';
+import logger from './logger.js';
 
 export default function loggingAPI () {
   return (req, res, next) => {
@@ -13,7 +13,6 @@ export default function loggingAPI () {
       } else {
         logger.info(log);
       }
-      // supprimé : global.metricsCollector.recordApiRequest(...)
     });
     next();
   };
