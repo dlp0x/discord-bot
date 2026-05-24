@@ -23,9 +23,9 @@ export function registerProcessHandlers ({ gracefulShutdown }) {
 
   process.once('SIGUSR2', async () => {
     logger.warn('Signal SIGUSR2 reçu.');
-
+  
     await gracefulShutdown('SIGUSR2');
-
+  
     process.kill(process.pid, 'SIGUSR2');
   });
 

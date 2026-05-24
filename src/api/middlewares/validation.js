@@ -7,6 +7,26 @@ import logger from '#shared/logging/logger.js';
 import validator from '#shared/validation/validation.js';
 
 // =========================
+// SCHEMAS (Zod reste ici)
+// =========================
+const userInputSchema = z.object({
+  title: z.string().min(1).max(200),
+  artist: z.string().min(1).max(100),
+  userId: z.string().min(17).max(20),
+  username: z.string().min(1).max(32)
+});
+
+const playlistSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  tracks: z.array(z.string().url()).min(1).max(100)
+});
+
+const apiKeySchema = z.object({
+  'x-api-key': z.string().min(32).max(64)
+});
+
+// =========================
 // GENERIC VALIDATION MIDDLEWARE
 // =========================
 export function validateRequest (schema) {

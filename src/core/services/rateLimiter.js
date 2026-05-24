@@ -2,13 +2,13 @@
 // core/utils/rateLimiter.js - Système de rate limiting pour Discord
 // ========================================
 
-import logger from '../../shared/logging/logger.js';
+import logger from "../../shared/logging/logger.js";
 
 /**
  * Classe de rate limiting avec différents niveaux de limitation
  */
 class RateLimiter {
-  constructor () {
+  constructor() {
     this.limits = new Map();
     this.windows = new Map();
     this.blockedUsers = new Map();
@@ -19,39 +19,39 @@ class RateLimiter {
       general: {
         maxRequests: 10,
         windowMs: 60000, // 1 minute
-        blockDuration: 300000 // 5 minutes
+        blockDuration: 300000, // 5 minutes
       },
       // Commandes de suggestion
       suggestion: {
         maxRequests: 3,
         windowMs: 300000, // 5 minutes
-        blockDuration: 900000 // 15 minutes
+        blockDuration: 900000, // 15 minutes
       },
       // Commandes DJ (admin)
       dj: {
         maxRequests: 5,
         windowMs: 60000, // 1 minute
-        blockDuration: 600000 // 10 minutes
+        blockDuration: 600000, // 10 minutes
       },
       // Commandes critiques
       critical: {
         maxRequests: 2,
         windowMs: 60000, // 1 minute
-        blockDuration: 1800000 // 30 minutes
+        blockDuration: 1800000, // 30 minutes
       },
       // API requests
       api: {
         maxRequests: 20,
         windowMs: 60000, // 1 minute
-        blockDuration: 300000 // 5 minutes
-      }
+        blockDuration: 300000, // 5 minutes
+      },
     };
   }
 
   /**
    * Vérifier si un utilisateur peut exécuter une commande
    */
-  canExecute (userId, commandType = 'general') {
+  canExecute(userId, commandType = "general") {
     const config = this.configs[commandType] || this.configs.general;
     const key = `${userId}:${commandType}`;
 
@@ -59,8 +59,8 @@ class RateLimiter {
     if (this.isBlocked(userId, commandType)) {
       return {
         allowed: false,
-        reason: 'USER_BLOCKED',
-        remainingTime: this.getBlockRemainingTime(userId, commandType)
+        reason: "USER_BLOCKED",
+        remainingTime: this.getBlockRemainingTime(userId, commandType),
       };
     }
 
@@ -86,14 +86,14 @@ class RateLimiter {
         commandType,
         requests: recentRequests.length,
         limit: config.maxRequests,
-        blockDuration: config.blockDuration
+        blockDuration: config.blockDuration,
       });
 
       return {
         allowed: false,
-        reason: 'RATE_LIMIT_EXCEEDED',
+        reason: "RATE_LIMIT_EXCEEDED",
         remainingTime: config.blockDuration,
-        retryAfter: this.getNextWindowTime(key, config.windowMs)
+        retryAfter: this.getNextWindowTime(key, config.windowMs),
       };
     }
 
@@ -104,14 +104,14 @@ class RateLimiter {
     return {
       allowed: true,
       remaining: config.maxRequests - recentRequests.length,
-      resetTime: windowStart + config.windowMs
+      resetTime: windowStart + config.windowMs,
     };
   }
 
   /**
    * Enregistrer l'exécution d'une commande
    */
-  recordExecution (userId, commandType = 'general') {
+  recordExecution(userId, commandType = "general") {
     const key = `${userId}:${commandType}`;
     const now = Date.now();
 
@@ -125,14 +125,14 @@ class RateLimiter {
     logger.debug(`Commande exécutée: ${commandType} par ${userId}`, {
       userId,
       commandType,
-      timestamp: now
+      timestamp: now,
     });
   }
 
   /**
    * Vérifier si un utilisateur est bloqué
    */
-  isBlocked (userId, commandType = 'general') {
+  isBlocked(userId, commandType = "general") {
     const key = `${userId}:${commandType}`;
     const blockInfo = this.blockedUsers.get(key);
 
@@ -150,27 +150,27 @@ class RateLimiter {
   /**
    * Bloquer un utilisateur temporairement
    */
-  blockUser (userId, commandType, duration) {
+  blockUser(userId, commandType, duration) {
     const key = `${userId}:${commandType}`;
     this.blockedUsers.set(key, {
       userId,
       commandType,
       blockedAt: Date.now(),
-      expiresAt: Date.now() + duration
+      expiresAt: Date.now() + duration,
     });
 
     logger.warn(`Utilisateur bloqué: ${userId} sur ${commandType}`, {
       userId,
       commandType,
       duration,
-      expiresAt: new Date(Date.now() + duration).toISOString()
+      expiresAt: new Date(Date.now() + duration).toISOString(),
     });
   }
 
   /**
    * Débloquer un utilisateur manuellement
    */
-  unblockUser (userId, commandType = 'general') {
+  unblockUser(userId, commandType = "general") {
     const key = `${userId}:${commandType}`;
     const wasBlocked = this.blockedUsers.has(key);
 
@@ -182,7 +182,7 @@ class RateLimiter {
         `Utilisateur débloqué manuellement: ${userId} sur ${commandType}`,
         {
           userId,
-          commandType
+          commandType,
         }
       );
     }
@@ -193,7 +193,7 @@ class RateLimiter {
   /**
    * Obtenir le temps restant de blocage
    */
-  getBlockRemainingTime (userId, commandType = 'general') {
+  getBlockRemainingTime(userId, commandType = "general") {
     const key = `${userId}:${commandType}`;
     const blockInfo = this.blockedUsers.get(key);
 
@@ -206,7 +206,7 @@ class RateLimiter {
   /**
    * Obtenir le temps jusqu'à la prochaine fenêtre
    */
-  getNextWindowTime (key, windowMs) {
+  getNextWindowTime(key, windowMs) {
     const requests = this.windows.get(key) || [];
     if (requests.length === 0) return 0;
 
@@ -217,7 +217,7 @@ class RateLimiter {
   /**
    * Nettoyer les anciennes entrées
    */
-  cleanOldEntries (key, windowStart) {
+  cleanOldEntries(key, windowStart) {
     const requests = this.windows.get(key);
     if (!requests) return;
 
@@ -228,12 +228,12 @@ class RateLimiter {
   /**
    * Nettoyer périodiquement les données expirées
    */
-  cleanup () {
+  cleanup() {
     const now = Date.now();
 
     // Nettoyer les fenêtres
     for (const [key, requests] of this.windows) {
-      const [, commandType] = key.split(':');
+      const [, commandType] = key.split(":");
       const config = this.configs[commandType] || this.configs.general;
       const windowStart = now - config.windowMs;
 
@@ -256,21 +256,21 @@ class RateLimiter {
   /**
    * Obtenir les statistiques de rate limiting
    */
-  getStats () {
+  getStats() {
     const stats = {
       totalWindows: this.windows.size,
       totalBlocked: this.blockedUsers.size,
       blockedUsers: [],
-      commandStats: {}
+      commandStats: {},
     };
 
     // Statistiques par commande
     for (const [key, requests] of this.windows) {
-      const [, commandType] = key.split(':');
+      const [, commandType] = key.split(":");
       if (!stats.commandStats[commandType]) {
         stats.commandStats[commandType] = {
           activeWindows: 0,
-          totalRequests: 0
+          totalRequests: 0,
         };
       }
       stats.commandStats[commandType].activeWindows++;
@@ -279,13 +279,13 @@ class RateLimiter {
 
     // Utilisateurs bloqués
     for (const [key, blockInfo] of this.blockedUsers) {
-      const [userId, commandType] = key.split(':');
+      const [userId, commandType] = key.split(":");
       stats.blockedUsers.push({
         userId,
         commandType,
         blockedAt: new Date(blockInfo.blockedAt).toISOString(),
         expiresAt: new Date(blockInfo.expiresAt).toISOString(),
-        remainingTime: this.getBlockRemainingTime(userId, commandType)
+        remainingTime: this.getBlockRemainingTime(userId, commandType),
       });
     }
 
@@ -295,10 +295,10 @@ class RateLimiter {
   /**
    * Réinitialiser toutes les limitations
    */
-  reset () {
+  reset() {
     this.windows.clear();
     this.blockedUsers.clear();
-    logger.info('Rate limiter réinitialisé');
+    logger.info("Rate limiter réinitialisé");
   }
 }
 
@@ -311,23 +311,23 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 // Fonctions utilitaires
-export function checkRateLimit (userId, commandType = 'general') {
+export function checkRateLimit(userId, commandType = "general") {
   return rateLimiter.canExecute(userId, commandType);
 }
 
-export function recordCommand (userId, commandType = 'general') {
+export function recordCommand(userId, commandType = "general") {
   rateLimiter.recordExecution(userId, commandType);
 }
 
-export function isUserBlocked (userId, commandType = 'general') {
+export function isUserBlocked(userId, commandType = "general") {
   return rateLimiter.isBlocked(userId, commandType);
 }
 
-export function unblockUser (userId, commandType = 'general') {
+export function unblockUser(userId, commandType = "general") {
   return rateLimiter.unblockUser(userId, commandType);
 }
 
-export function getRateLimitStats () {
+export function getRateLimitStats() {
   return rateLimiter.getStats();
 }
 

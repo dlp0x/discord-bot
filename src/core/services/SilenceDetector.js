@@ -297,7 +297,7 @@ class SilenceDetector {
         logger.error('Client Discord pas prêt');
         return null;
       }
-
+  
       return getClient();
     } catch (error) {
       logger.error(
