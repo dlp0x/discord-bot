@@ -301,7 +301,7 @@ class Monitor {
 
     const errorId = generateErrorId();
     this.logger.error(
-      `[${errorId}] ERREUR TÂCHE [${context}]: ${error.message}`,
+      `[${errorId}] ERREUR TÃ‚CHE [${context}]: ${error.message}`,
       {
         errorId,
         context,
@@ -501,7 +501,7 @@ class Monitor {
    * Envoie une alerte
    */
   sendAlert (errorType, errorId) {
-    this.logger.warn(`🚨 ALERTE: Trop d'erreurs ${errorType} (${errorId})`);
+    this.logger.warn(`ðŸš¨ ALERTE: Trop d'erreurs ${errorType} (${errorId})`);
     // Ici on pourrait envoyer une notification Discord, email, etc.
   }
 
