@@ -1,5 +1,5 @@
 // ========================================
-// core/monitor.js - Gestion centralisée des erreurs et monitoring optimisé
+// core/monitor.js - Gestion centralisÃ©e des erreurs et monitoring optimisÃ©
 // ========================================
 
 import { MessageFlags } from 'discord.js';
@@ -21,7 +21,7 @@ class Monitor {
   }
 
   /**
-   * Met à jour les métriques via AppState
+   * Met Ã  jour les mÃ©triques via AppState
    */
   updateMetric (metricName) {
     switch (metricName) {
@@ -49,7 +49,7 @@ class Monitor {
   }
 
   /**
-   * Récupère les métriques depuis AppState
+   * RÃ©cupÃ¨re les mÃ©triques depuis AppState
    */
   getMetrics () {
     const fullState = appState.getFullState();
@@ -72,7 +72,7 @@ class Monitor {
   }
 
   /**
-   * Vérifie l'état de santé du système via AppState //
+   * VÃ©rifie l'Ã©tat de santÃ© du systÃ¨me via AppState //
    */
   async checkHealth () {
     const appHealth = appState.isHealthy();
@@ -86,13 +86,13 @@ class Monitor {
   }
 
   /**
-   * Gère spécifiquement les erreurs 521
+   * GÃ¨re spÃ©cifiquement les erreurs 521
    */
   async handle521Error (error, context = 'unknown') {
     const errorId = generateErrorId();
     const now = Date.now();
 
-    // Reset du compteur si plus de 5 minutes depuis la dernière erreur 521
+    // Reset du compteur si plus de 5 minutes depuis la derniÃ¨re erreur 521
     if (now - this.last521ErrorTime > this.error521ResetInterval) {
       this.error521Count = 0;
     }
@@ -113,38 +113,38 @@ class Monitor {
       }
     );
 
-    // Si on atteint le seuil et qu'on n'est pas déjà en train de redémarrer
+    // Si on atteint le seuil et qu'on n'est pas dÃ©jÃ  en train de redÃ©marrer
     if (this.error521Count >= this.max521ErrorsBeforeRestart && !this.isRestarting) {
       this.logger.warn(
-        `🔄 REDÉMARRAGE AUTOMATIQUE déclenché après ${this.error521Count} erreurs 521`
+        `ðŸ”„ REDÃ‰MARRAGE AUTOMATIQUE dÃ©clenchÃ© aprÃ¨s ${this.error521Count} erreurs 521`
       );
 
       await this.performAutoRestart(errorId);
     } else if (!this.isRestarting) {
       this.logger.info(
-        `⚠️ Erreur 521 détectée (${this.error521Count}/${this.max521ErrorsBeforeRestart}).
-         Redémarrage automatique si répétition.`
+        `âš ï¸ Erreur 521 dÃ©tectÃ©e (${this.error521Count}/${this.max521ErrorsBeforeRestart}).
+         RedÃ©marrage automatique si rÃ©pÃ©tition.`
       );
     }
   }
 
   /**
-   * Effectue le redémarrage automatique
+   * Effectue le redÃ©marrage automatique
    */
   async performAutoRestart (errorId) {
     if (this.isRestarting) {
-      this.logger.warn('Redémarrage déjà en cours, abandon...');
+      this.logger.warn('RedÃ©marrage dÃ©jÃ  en cours, abandon...');
       return;
     }
 
     this.isRestarting = true;
 
     try {
-      this.logger.warn(`🔄 [${errorId}] DÉBUT DU REDÉMARRAGE AUTOMATIQUE`);
+      this.logger.warn(`ðŸ”„ [${errorId}] DÃ‰BUT DU REDÃ‰MARRAGE AUTOMATIQUE`);
 
       // Notification critique
       this.sendCriticalAlert(
-        new Error(`Redémarrage automatique suite à ${this.error521Count} erreurs 521`),
+        new Error(`RedÃ©marrage automatique suite Ã  ${this.error521Count} erreurs 521`),
         errorId,
         'AUTO_RESTART_521'
       );
@@ -152,45 +152,45 @@ class Monitor {
       // Attendre un peu pour permettre aux logs de se finaliser
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Redémarrage gracieux
-      this.logger.warn('🔄 Redémarrage du processus Node.js...');
+      // RedÃ©marrage gracieux
+      this.logger.warn('ðŸ”„ RedÃ©marrage du processus Node.js...');
 
-      // Reset du compteur avant redémarrage
+      // Reset du compteur avant redÃ©marrage
       this.error521Count = 0;
 
-      // Exit avec code 2 pour indiquer un redémarrage volontaire
+      // Exit avec code 2 pour indiquer un redÃ©marrage volontaire
       // (PM2, nodemon ou systemd peuvent relancer automatiquement)
       process.exit(2);
     } catch (restartError) {
-      this.logger.error('Erreur lors du redémarrage automatique:', restartError);
+      this.logger.error('Erreur lors du redÃ©marrage automatique:', restartError);
       this.isRestarting = false;
 
-      // Si le redémarrage échoue, essayer un arrêt d'urgence
+      // Si le redÃ©marrage Ã©choue, essayer un arrÃªt d'urgence
       setTimeout(() => {
-        this.logger.error('ARRÊT D\'URGENCE après échec du redémarrage gracieux');
+        this.logger.error('ARRÃŠT D\'URGENCE aprÃ¨s Ã©chec du redÃ©marrage gracieux');
         process.exit(1);
       }, 5000);
     }
   }
 
   /**
-   * Gère les erreurs de commandes Discord
+   * GÃ¨re les erreurs de commandes Discord
    */
   async handleCommandError (error, interaction) {
     const errorId = generateErrorId();
     const errorType = this.categorizeError(error);
 
-    // Vérifier si c'est une erreur 521
+    // VÃ©rifier si c'est une erreur 521
     if (this.is521Error(error)) {
       await this.handle521Error(error, `COMMAND_${interaction?.commandName || 'unknown'}`);
       return;
     }
 
-    // Mettre à jour les métriques via AppState
+    // Mettre Ã  jour les mÃ©triques via AppState
     this.updateMetric('commandsFailed');
     this.incrementErrorCount(errorType);
 
-    // Log l'erreur avec contexte détaillé
+    // Log l'erreur avec contexte dÃ©taillÃ©
     this.logger.error(
       `[${errorId}] Erreur commande ${interaction?.commandName || 'unknown'}: ${
         error.message
@@ -206,7 +206,7 @@ class Monitor {
       }
     );
 
-    // Réponse à l'utilisateur avec message approprié
+    // RÃ©ponse Ã  l'utilisateur avec message appropriÃ©
     if (interaction && !interaction.replied && !interaction.deferred) {
       const userMessage = this.getUserFriendlyMessage(errorType);
       await interaction.reply({
@@ -227,10 +227,10 @@ class Monitor {
   }
 
   /**
-   * Gère les erreurs API avec métriques
+   * GÃ¨re les erreurs API avec mÃ©triques
    */
   handleApiError (error, req, res) {
-    // Vérifier si c'est une erreur 521
+    // VÃ©rifier si c'est une erreur 521
     if (this.is521Error(error)) {
       this.handle521Error(error, `API_${req?.method}_${req?.path}`);
       return;
@@ -284,10 +284,10 @@ class Monitor {
   }
 
   /**
-   * Gère les erreurs critiques avec alerting
+   * GÃ¨re les erreurs critiques avec alerting
    */
   handleCriticalError (error, context = 'unknown') {
-    // Vérifier si c'est une erreur 521
+    // VÃ©rifier si c'est une erreur 521
     if (this.is521Error(error)) {
       this.handle521Error(error, context);
       return;
@@ -295,21 +295,21 @@ class Monitor {
 
 
 
-    // Notification immédiate
+    // Notification immÃ©diate
     this.sendCriticalAlert(error, errorId, context);
 
-    // Arrêt gracieux si nécessaire
+    // ArrÃªt gracieux si nÃ©cessaire
     if (this.shouldShutdown(error)) {
-      this.logger.error('Erreur critique détectée, arrêt de l\'application...');
+      this.logger.error('Erreur critique dÃ©tectÃ©e, arrÃªt de l\'application...');
       process.exit(1);
     }
   }
 
   /**
-   * Gère les erreurs de tâches planifiées
+   * GÃ¨re les erreurs de tÃ¢ches planifiÃ©es
    */
   handleTaskError (error, context = 'TASK') {
-    // Vérifier si c'est une erreur 521
+    // VÃ©rifier si c'est une erreur 521
     if (this.is521Error(error)) {
       this.handle521Error(error, context);
       return;
@@ -317,7 +317,7 @@ class Monitor {
 
     const errorId = generateErrorId();
     this.logger.error(
-      `[${errorId}] ERREUR TÂCHE [${context}]: ${error.message}`,
+      `[${errorId}] ERREUR TÃ‚CHE [${context}]: ${error.message}`,
       {
         errorId,
         context,
@@ -331,10 +331,10 @@ class Monitor {
   }
 
   /**
-   * Gère les erreurs de base de données
+   * GÃ¨re les erreurs de base de donnÃ©es
    */
   handleDatabaseError (error, operation = 'unknown') {
-    // Vérifier si c'est une erreur 521
+    // VÃ©rifier si c'est une erreur 521
     if (this.is521Error(error)) {
       this.handle521Error(error, `DATABASE_${operation}`);
       return;
@@ -344,7 +344,7 @@ class Monitor {
 
     const errorId = generateErrorId();
     this.logger.error(
-      `[${errorId}] ERREUR BASE DE DONNÉES [${operation}]: ${error.message}`,
+      `[${errorId}] ERREUR BASE DE DONNÃ‰ES [${operation}]: ${error.message}`,
       {
         errorId,
         operation,
@@ -352,7 +352,7 @@ class Monitor {
       }
     );
 
-    // Mettre à jour le statut de santé via AppState
+    // Mettre Ã  jour le statut de santÃ© via AppState
     appState.setDatabaseHealthy(false);
 
     if (this.shouldAlert('DATABASE')) {
@@ -361,7 +361,7 @@ class Monitor {
   }
 
   /**
-   * Détermine si une erreur est de type 521
+   * DÃ©termine si une erreur est de type 521
    */
   is521Error (error) {
     if (!error) return false;
@@ -382,10 +382,10 @@ class Monitor {
   }
 
   /**
-   * Catégorise les erreurs avec plus de précision
+   * CatÃ©gorise les erreurs avec plus de prÃ©cision
    */
   categorizeError (error) {
-    // Vérifier d'abord si c'est une erreur 521
+    // VÃ©rifier d'abord si c'est une erreur 521
     if (this.is521Error(error)) {
       return 'SERVER_521';
     }
@@ -428,28 +428,28 @@ class Monitor {
   }
 
   /**
-   * Messages utilisateur-friendly améliorés
+   * Messages utilisateur-friendly amÃ©liorÃ©s
    */
   getUserFriendlyMessage (errorType) {
     const messages = {
-      SERVER_521: '🔧 Le serveur est temporairement indisponible. Redémarrage automatique en cours...',
+      SERVER_521: 'ðŸ”§ Le serveur est temporairement indisponible. RedÃ©marrage automatique en cours...',
       NETWORK:
-        '🌐 Problème de connexion réseau. Réessayez dans quelques instants.',
-      PERMISSION: '🔒 Permissions insuffisantes pour cette action.',
-      AUTH: '🔑 Erreur d\'authentification. Contactez un administrateur.',
-      RATE_LIMIT: '⏱️ Trop de requêtes. Attendez un moment avant de réessayer.',
-      VOICE: '🎵 Erreur audio. Vérifiez votre connexion vocale.',
-      DATABASE: '💾 Erreur de base de données. Réessayez plus tard.',
-      DISCORD_API: '🤖 Erreur Discord API. Réessayez plus tard.',
-      TIMEOUT: '⏰ Délai d\'attente dépassé. Réessayez plus tard.',
-      UNKNOWN: '❓ Une erreur inattendue s\'est produite. Réessayez plus tard.'
+        'ðŸŒ ProblÃ¨me de connexion rÃ©seau. RÃ©essayez dans quelques instants.',
+      PERMISSION: 'ðŸ”’ Permissions insuffisantes pour cette action.',
+      AUTH: 'ðŸ”‘ Erreur d\'authentification. Contactez un administrateur.',
+      RATE_LIMIT: 'â±ï¸ Trop de requÃªtes. Attendez un moment avant de rÃ©essayer.',
+      VOICE: 'ðŸŽµ Erreur audio. VÃ©rifiez votre connexion vocale.',
+      DATABASE: 'ðŸ’¾ Erreur de base de donnÃ©es. RÃ©essayez plus tard.',
+      DISCORD_API: 'ðŸ¤– Erreur Discord API. RÃ©essayez plus tard.',
+      TIMEOUT: 'â° DÃ©lai d\'attente dÃ©passÃ©. RÃ©essayez plus tard.',
+      UNKNOWN: 'â“ Une erreur inattendue s\'est produite. RÃ©essayez plus tard.'
     };
 
     return messages[errorType] || messages.UNKNOWN;
   }
 
   /**
-   * Codes HTTP appropriés
+   * Codes HTTP appropriÃ©s
    */
   getHttpStatusCode (errorType) {
     const codes = {
@@ -482,7 +482,7 @@ class Monitor {
     const minuteCounts = this.errorCounts.get(minuteKey);
     minuteCounts.set(errorType, (minuteCounts.get(errorType) || 0) + 1);
 
-    // Nettoyer les anciennes entrées (plus de 5 minutes)
+    // Nettoyer les anciennes entrÃ©es (plus de 5 minutes)
     for (const [key] of this.errorCounts) {
       if (key < minuteKey - 5) {
         this.errorCounts.delete(key);
@@ -491,7 +491,7 @@ class Monitor {
   }
 
   /**
-   * Détermine si une alerte doit être envoyée
+   * DÃ©termine si une alerte doit Ãªtre envoyÃ©e
    */
   shouldAlert (errorType) {
     const now = Date.now();
@@ -505,7 +505,7 @@ class Monitor {
   }
 
   /**
-   * Détermine si l'application doit s'arrêter
+   * DÃ©termine si l'application doit s'arrÃªter
    */
   shouldShutdown (error) {
     const criticalErrors = ['AUTH', 'DATABASE'];
@@ -517,7 +517,7 @@ class Monitor {
    * Envoie une alerte
    */
   sendAlert (errorType, errorId) {
-    this.logger.warn(`🚨 ALERTE: Trop d'erreurs ${errorType} (${errorId})`);
+    this.logger.warn(`ðŸš¨ ALERTE: Trop d'erreurs ${errorType} (${errorId})`);
     // Ici on pourrait envoyer une notification Discord, email, etc.
   }
 
@@ -525,19 +525,13 @@ class Monitor {
    * Envoie une alerte critique
    */
   sendCriticalAlert (error, errorId, context) {
-    this.logger.error(`🚨 ALERTE CRITIQUE [${context}]: ${errorId}`);
-    // Ici on pourrait envoyer une notification immédiate
+    this.logger.error(`ðŸš¨ ALERTE CRITIQUE [${context}]: ${errorId}`);
+    // Ici on pourrait envoyer une notification immÃ©diate
   }
 
-  /**
-   * Génère un ID d'erreur unique
-   */
-  generateErrorId () {
-    return `ERR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
 
   /**
-   * Récupère les statistiques de performance depuis AppState
+   * RÃ©cupÃ¨re les statistiques de performance depuis AppState
    */
   getPerformanceStats () {
     const fullState = appState.getFullState();
@@ -555,15 +549,15 @@ class Monitor {
   }
 
   /**
-   * Méthode pour tester manuellement le redémarrage (à des fins de debug)
+   * MÃ©thode pour tester manuellement le redÃ©marrage (Ã  des fins de debug)
    */
   testAutoRestart () {
     if (process.env.NODE_ENV !== 'development') {
-      this.logger.warn('Test de redémarrage disponible uniquement en développement');
+      this.logger.warn('Test de redÃ©marrage disponible uniquement en dÃ©veloppement');
       return;
     }
 
-    this.logger.info('🧪 Test de redémarrage automatique...');
+    this.logger.info('ðŸ§ª Test de redÃ©marrage automatique...');
     this.error521Count = this.max521ErrorsBeforeRestart;
     this.handle521Error(new Error('Test 521 error'), 'MANUAL_TEST');
   }

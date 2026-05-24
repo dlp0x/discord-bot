@@ -4,6 +4,23 @@
 
 import validator from '#shared/validation/validation.js';
 
+function validateDiscordIdSafe (id) {
+  try {
+    validator.validateDiscordId(id);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function validateSuggestion (input) {
+  const sanitized = validator.sanitize(input, { maxLength: 200 });
+  if (!sanitized || sanitized.length < 1) {
+    throw new Error('Invalid suggestion value');
+  }
+  return sanitized;
+}
+
 /**
    * Valider et sanitiser les entrées de l'interaction
    */
@@ -12,11 +29,11 @@ export async function validateInteractionInput (interaction) {
     const userId = interaction.user.id;
 
     // Validation de base
-    if (!validator.validateDiscordId(userId)) {
+    if (!validateDiscordIdSafe(userId)) {
       return { valid: false, error: 'ID utilisateur invalide' };
     }
 
-    if (interaction.guildId && !validator.validateDiscordId(interaction.guildId)) {
+    if (interaction.guildId && !validateDiscordIdSafe(interaction.guildId)) {
       return { valid: false, error: 'ID serveur invalide' };
     }
 
@@ -136,7 +153,7 @@ function validateModerationCommand (interaction, options) {
     return { valid: false, error: 'Utilisateur cible requis' };
   }
 
-  if (!validateDiscordId(targetUser.id)) {
+  if (!validateDiscordIdSafe(targetUser.id)) {
     return { valid: false, error: 'ID utilisateur cible invalide' };
   }
 
