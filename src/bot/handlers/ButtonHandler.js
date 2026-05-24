@@ -1,7 +1,7 @@
 // ========================================
 // bot/events/handlers/ButtonHandler.js - Gestion des interactions de boutons
 // ========================================
-
+import { MessageFlags } from 'discord.js';
 import logger from '../../shared/logging/logger.js';
 import { safeStringify } from '../utils/SafeStringify.js';
 

@@ -75,7 +75,7 @@ class Monitor {
     const errorId = generateErrorId();
     const now = Date.now();
 
- 
+
     if (now - this.last521ErrorTime > this.error521ResetInterval) {
       this.error521Count = 0;
     }
@@ -275,7 +275,6 @@ class Monitor {
       this.handle521Error(error, context);
       return;
     }
-
 
 
     // Notification immediate

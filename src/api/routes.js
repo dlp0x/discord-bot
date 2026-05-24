@@ -13,7 +13,7 @@ export default function loadRoutes (app, client, logger) {
       timestamp: new Date().toISOString(),
       endpoints: {
         health: '/v1/health',
-        
+
         playlist: '/v1/send-playlist',
         silence: '/v1/silence'
       }
@@ -21,7 +21,7 @@ export default function loadRoutes (app, client, logger) {
   });
 
   app.use('/v1/health', healthRoutes(client, logger));
-  
+
   app.use('/v1/send-playlist', playlistRoutes(client, logger));
   app.use('/v1/silence', silenceRoutes(client, logger));
 
