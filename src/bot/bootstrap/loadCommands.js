@@ -1,20 +1,10 @@
-// ========================================
-// bot/bootstrap/loadCommands.js (ESM) - Version corrigée pour subcommands
-// ========================================
-
-import fs from 'node:fs';
+﻿import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import logger from '#shared/logging/logger.js';
+import logger from '#bot/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/**
- * Charge récursivement tous les fichiers de commandes dans les sous-dossiers
- * @param {string} dirPath - Chemin du dossier à scanner
- * @param {string} basePath - Chemin de base pour les logs
- * @returns {Array} Liste des fichiers .js trouvés avec leurs chemins complets
- */
 function getCommandFiles (dirPath, basePath = '') {
   const files = [];
 
@@ -44,20 +34,14 @@ function getCommandFiles (dirPath, basePath = '') {
   return files;
 }
 
-/**
- * Valide qu'un module de commande est correctement structuré
- * @param {Object} commandModule - Module importé
- * @param {string} fileName - Nom du fichier pour les logs
- * @returns {Object} Résultat de validation
- */
 function validateCommandModule (commandModule, fileName) {
-  const isHelperModule
-    = typeof commandModule.buildConfigGroup === 'function'
-      || typeof commandModule.buildReloadGroup === 'function'
-      || typeof commandModule.buildDebugGroup === 'function'
-      || typeof commandModule.handleConfigGroup === 'function'
-      || typeof commandModule.handleReloadGroup === 'function'
-      || typeof commandModule.handleDebugGroup === 'function';
+  const isHelperModule =
+    typeof commandModule.buildConfigGroup === 'function'
+    || typeof commandModule.buildReloadGroup === 'function'
+    || typeof commandModule.buildDebugGroup === 'function'
+    || typeof commandModule.handleConfigGroup === 'function'
+    || typeof commandModule.handleReloadGroup === 'function'
+    || typeof commandModule.handleDebugGroup === 'function';
 
   if (isHelperModule) {
     return { valid: true, helper: true };
@@ -69,12 +53,10 @@ function validateCommandModule (commandModule, fileName) {
 
   const command = commandModule.default;
 
-  // Cas sous-commande : a un builder mais pas de data → on ne la valide pas ici
   if (typeof command.builder === 'function' && !command.data) {
     return { valid: true, subcommand: true };
   }
 
-  // Cas commande principale : doit avoir data.name et execute()
   if (!command.data || !command.data.name) {
     return { valid: false, error: `Pas de data.name dans ${fileName}` };
   }
@@ -86,14 +68,12 @@ function validateCommandModule (commandModule, fileName) {
   return { valid: true };
 }
 
-/**
- * Charge toutes les commandes depuis le dossier commands et ses sous-dossiers
- * @param {Object} client - Client Discord.js
- * @param {Function} importFn - Fonction d'import (pour les tests)
- * @returns {Object} Statistiques de chargement
- */
 export async function loadCommands (client, importFn = (src) => import(src)) {
   try {
+    if (typeof logger.infomd !== 'function' && typeof logger.info === 'function') {
+      logger.infomd = logger.info;
+    }
+
     const commandsPath = path.join(__dirname, '../commands');
 
     if (!fs.existsSync(commandsPath)) {
@@ -104,12 +84,12 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
     const commandFiles = getCommandFiles(commandsPath);
 
     if (commandFiles.length === 0) {
-      logger.warn('Aucun fichier de commande trouvé');
+      logger.warn('Aucun fichier de commande trouve');
       return { loaded: [], failed: [], total: 0, categories: {} };
     }
 
     logger.section('Chargement des commandes');
-    logger.info(`${commandFiles.length} fichiers de commandes détectés`);
+    logger.info(`${commandFiles.length} fichiers de commandes detectes`);
 
     const loadedCommands = [];
     const failedCommands = [];
@@ -129,9 +109,15 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
           continue;
         }
 
-        // Si c'est une sous-commande/helper : on ne l'enregistre pas ici
         if (validation.subcommand || validation.helper) {
-          logger.cmd(`Chargée via parent : ${relativePath}`);
+          if (validation.subcommand) {
+            logger.debug(`Sous-commande ignorée (chargée via parent): ${relativePath}`);
+          }
+          if (typeof logger.cmd === 'function') {
+            logger.cmd(`Chargee via parent : ${relativePath}`);
+          } else {
+            logger.info(`Chargee via parent : ${relativePath}`);
+          }
           continue;
         }
 
@@ -153,7 +139,11 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
         categories[category].push(commandName);
 
         loadedCommands.push({ name: commandName, file: relativePath, category });
-        logger.cmd(`${commandName} (${category})`);
+        if (typeof logger.infomd === 'function') {
+          logger.infomd(`${commandName} (${category})`);
+        } else {
+          logger.info(`${commandName} (${category})`);
+        }
       } catch (error) {
         const errorMsg = `Erreur lors du chargement de ${relativePath}: ${error.message}`;
         logger.error(errorMsg);
@@ -181,3 +171,5 @@ export async function loadCommands (client, importFn = (src) => import(src)) {
     return { loaded: [], failed: [], total: 0, categories: {}, criticalError: error.message };
   }
 }
+
+

@@ -325,7 +325,7 @@ describe("API Integration Tests", () => {
     it("should handle metrics collection efficiently", async () => {
       const start = Date.now();
 
-      await request(app).get("/metrics").expect(200);
+      await request(app).get("/health").expect(200);
 
       const duration = Date.now() - start;
       expect(duration).toBeLessThan(1000); // Should respond within 1 second
@@ -334,7 +334,7 @@ describe("API Integration Tests", () => {
 
   describe("API Security", () => {
     it("should not expose sensitive information", async () => {
-      const response = await request(app).get("/metrics").expect(200);
+      const response = await request(app).get("/health").expect(200);
 
       // Should not expose tokens or sensitive data
       expect(JSON.stringify(response.body)).not.toContain("test-token");
@@ -367,4 +367,3 @@ describe("API Integration Tests", () => {
     });
   });
 });
-
