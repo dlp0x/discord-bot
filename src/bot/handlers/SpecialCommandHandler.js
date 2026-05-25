@@ -22,20 +22,23 @@ export async function handleSpecialCommands (interaction, result, commandName) {
   }
 }
 
+/**
+ * Traiter la commande play
+ */
 async function handlePlayCommand (interaction) {
   try {
-    logger.info('Debut de handlePlayCommand');
+    logger.info('🚀 Début de handlePlayCommand');
 
     const { voice } = interaction.member;
     const channel = voice && voice.channel;
 
-    logger.info('Verification du canal vocal:', {
+    logger.info('📡 Vérification du canal vocal:', {
       hasVoice: !!voice,
       hasChannel: !!channel,
       channelType: channel?.type
     });
 
-    logger.info('Import des modules audio...');
+    logger.info('📦 Import des modules audio...');
     const {
       joinVoiceChannel,
       createAudioPlayer,
@@ -44,19 +47,19 @@ async function handlePlayCommand (interaction) {
       NoSubscriberBehavior,
       StreamType
     } = await import('@discordjs/voice');
-    logger.success('Modules audio importes avec succes');
+    logger.success('Modules audio importés avec succès');
 
     const config = (await import('../config.js')).default;
     const { STREAM_URL } = config;
-    logger.info('URL du stream récupérée:', STREAM_URL ? 'OK' : 'MANQUANTE');
+    logger.info('🔗 URL du stream récupérée:', STREAM_URL ? 'OK' : 'MANQUANTE');
 
     if (!STREAM_URL) {
-      logger.error('STREAM_URL non configurée dans les variables d\'environnement');
+      logger.error('❌ STREAM_URL non configurée dans les variables d\'environnement');
       await interaction.editReply('❌ URL du stream non configurée. Contactez un administrateur.');
       return;
     }
 
-    logger.info('Connexion au canal vocal...');
+    logger.info('🔌 Connexion au canal vocal...');
     let connection;
     try {
       connection = joinVoiceChannel({
@@ -67,7 +70,7 @@ async function handlePlayCommand (interaction) {
       });
       logger.success('Connexion établie');
     } catch (connectionError) {
-      logger.error('Erreur de connexion vocale:', {
+      logger.error('❌ Erreur de connexion vocale:', {
         message: connectionError.message,
         code: connectionError.code,
         channelId: channel.id,
@@ -77,7 +80,7 @@ async function handlePlayCommand (interaction) {
       return;
     }
 
-    logger.info('Création du player audio...');
+    logger.info('🎵 Création du player audio...');
     const player = createAudioPlayer({
       behaviors: {
         noSubscriber: NoSubscriberBehavior.Pause
@@ -85,9 +88,11 @@ async function handlePlayCommand (interaction) {
     });
     logger.success('Player créé');
 
+    // StreamType.Arbitrary évite la détection automatique de format
+    // et prévient le TimeoutNegativeWarning de @discordjs/voice
     const AUDIO_INPUT_TYPE = StreamType?.Arbitrary ?? undefined;
 
-    logger.info('Création de la ressource audio...');
+    logger.info('🎼 Création de la ressource audio...');
     let resource;
     try {
       resource = createAudioResource(STREAM_URL, {
@@ -96,7 +101,7 @@ async function handlePlayCommand (interaction) {
       });
       logger.success('Ressource audio créée');
     } catch (resourceError) {
-      logger.error('Erreur de création de ressource audio:', {
+      logger.error('❌ Erreur de création de ressource audio:', {
         message: resourceError.message,
         streamUrl: STREAM_URL
       });
@@ -104,24 +109,24 @@ async function handlePlayCommand (interaction) {
       return;
     }
 
-    logger.info('Lancement de la lecture...');
+    logger.info('▶️ Lancement de la lecture...');
     player.play(resource);
     connection.subscribe(player);
     logger.success('Lecture lancée');
 
     interaction.client.audio = { connection, player };
-    logger.info('Audio sauvegardé dans client.audio');
+    logger.info('💾 Audio sauvegardé dans client.audio');
 
     stageMonitor.registerStage(channel.guild.id, channel.id, channel.guild);
-    logger.info('Stage enregistré pour surveillance automatique');
+    logger.info('🎭 Stage enregistré pour surveillance automatique');
 
     const timeout = setTimeout(() => {
-      logger.warn('Timeout de 5s atteint');
+      logger.warn('⏰ Timeout de 5s atteint');
       interaction.editReply('⚠️ Aucun son détecté après 5s. Lecture échouée ?');
     }, 5000);
 
     player.once(AudioPlayerStatus.Playing, async () => {
-      logger.info('Événement Playing détecté');
+      logger.info('🎵 Événement Playing détecté');
       clearTimeout(timeout);
 
       try {
@@ -129,7 +134,7 @@ async function handlePlayCommand (interaction) {
 
         if (promotionResult.success) {
           await interaction.editReply('▶️ Stream lancé dans le stage channel. 🎤 Bot promu en speaker automatiquement.');
-          logger.success('Auto-promotion en speaker réussie');
+          logger.success('🎤 Auto-promotion en speaker réussie');
         } else {
           const missingPerms = stageSpeakerManager.formatMissingPermissions(
             promotionResult.missingPermissions || []
@@ -141,38 +146,43 @@ async function handlePlayCommand (interaction) {
             '▶️ Stream lancé dans le stage channel.\n⚠️ Auto-promotion en speaker échouée: '
             + `${promotionResult.message}\n${errorMessage}`
           );
-          logger.warn('Auto-promotion en speaker échouée:', promotionResult.message);
+          logger.warn('🎤 Auto-promotion en speaker échouée:', promotionResult.message);
         }
       } catch (promotionError) {
         await interaction.editReply(
           '▶️ Stream lancé dans le stage channel.\n⚠️ Erreur lors de l\'auto-promotion en speaker.'
         );
-        logger.error('Erreur lors de l\'auto-promotion:', promotionError);
+        logger.error('🎤 Erreur lors de l\'auto-promotion:', promotionError);
       }
 
       logger.success('Message de succès envoyé');
     });
 
     player.on('error', async (error) => {
-      logger.error('Erreur du player:', {
+      logger.error('❌ Erreur du player:', {
         message: error.message,
         code: error.code,
         stack: error.stack,
         streamUrl: STREAM_URL
       });
       clearTimeout(timeout);
-      await interaction.editReply(`❌ Erreur pendant la lecture du stream: ${error.message}`);
+      await interaction.editReply(
+        `❌ Erreur pendant la lecture du stream: ${error.message}`
+      );
     });
 
-    logger.success('handlePlayCommand termine avec succes');
+    logger.success('handlePlayCommand terminé avec succès');
   } catch (error) {
-    logger.error('Erreur lors du traitement de la commande play:', error);
+    logger.error('❌ Erreur lors du traitement de la commande play:', error);
     await interaction.editReply({
       content: '❌ Erreur lors de l\'exécution de la commande play.'
     });
   }
 }
 
+/**
+ * Traiter la commande schedule
+ */
 async function handleScheduleCommand (interaction, _result) {
   try {
     const scheduleCommand = await import('../../commands/schedule.js');
@@ -181,19 +191,19 @@ async function handleScheduleCommand (interaction, _result) {
     if (result && result.success) {
       await interaction.editReply({
         content: result.message,
-        flags: result.ephemeral !== false ? MessageFlags.Ephemeral : undefined
+        flags: result.ephemeral !== false ? 64 : 0
       });
     } else {
       await interaction.editReply({
         content: '❌ Erreur lors de l\'exécution de la commande schedule.',
-        flags: MessageFlags.Ephemeral
+        flags: 64
       });
     }
   } catch (error) {
     logger.error('Erreur lors du traitement de la commande schedule:', error);
     await interaction.editReply({
       content: '❌ Erreur lors de l\'exécution de la commande schedule.',
-      flags: MessageFlags.Ephemeral
+      flags: 64
     });
   }
 }

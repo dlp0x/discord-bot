@@ -26,7 +26,7 @@ class StageMonitor {
     // (et compatibilite des tests historiques)
     this.disconnectGraceMs = 3000;
 
-    (logger.init || logger.info).call(logger, 'StageMonitor initialisé');
+    logger.init('StageMonitor initialisé');
   }
 
   // ========================================
@@ -45,11 +45,10 @@ class StageMonitor {
       void this.checkAllStages();
     }, this.checkInterval);
 
-    (logger.init || logger.info).call(
-      logger,
+    logger.init(
       'Surveillance des stages initialisée '
-        + `(intervalle: ${this.checkInterval / 1000}s, `
-        + `grâce: ${this.disconnectGraceMs / 1000}s)`
+      + `(intervalle: ${this.checkInterval / 1000}s, `
+      + `grâce: ${this.disconnectGraceMs / 1000}s)`
     );
   }
 

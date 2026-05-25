@@ -24,9 +24,10 @@ export async function handleButtonInteraction (interaction, _client, _db, _confi
       return await handleFullStatsButton(interaction);
     }
 
+    // Bouton non reconnu
     await interaction.reply({
       content: '❌ Bouton non reconnu',
-      flags: MessageFlags.Ephemeral
+      flags: 64 // MessageFlags.Ephemeral
     });
     return { success: true, message: 'BUTTON_HANDLED', ephemeral: false };
   } catch (error) {
@@ -34,7 +35,7 @@ export async function handleButtonInteraction (interaction, _client, _db, _confi
     try {
       await interaction.reply({
         content: '❌ Une erreur est survenue lors du traitement du bouton.',
-        flags: MessageFlags.Ephemeral
+        flags: 64 // MessageFlags.Ephemeral
       });
     } catch (replyError) {
       logger.error(
@@ -50,9 +51,10 @@ export async function handleButtonInteraction (interaction, _client, _db, _confi
  * Gérer les boutons de suggestion
  */
 async function handleSuggestionButton (interaction) {
+  // Traitement des boutons de suggestion...
   await interaction.reply({
     content: 'Action effectuée avec succès!',
-    flags: MessageFlags.Ephemeral
+    flags: 64 // MessageFlags.Ephemeral
   });
   return { success: true, message: 'BUTTON_HANDLED', ephemeral: false };
 }
