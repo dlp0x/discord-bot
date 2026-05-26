@@ -20,8 +20,7 @@ async function execute (interaction) {
 
     connection.destroy();
     logger.info(`Bot déconnecté du vocal sur ${interaction.guild.name}`);
-    await interaction.reply('🛑 Stream arrêté, bot déconnecté du vocal.');
-    return { success: true, message: 'INTERACTION_ALREADY_HANDLED' };
+    return await interaction.reply('🛑 Stream arrêté, bot déconnecté du vocal.');
   } catch (error) {
     logger.error(`Erreur dans stop: ${error.message}`);
     return await interaction.reply('❌ Erreur lors de l\'arrêt du stream.');
