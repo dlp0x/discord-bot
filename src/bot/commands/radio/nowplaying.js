@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import axios from 'axios';
 import config from '../../config.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 const { JSON_URL } = config;
 
@@ -18,7 +18,8 @@ export default {
       const currentSong
         = data?.icestats?.source?.title || 'Aucune chanson en cours.';
 
-      return await interaction.reply(`🎶 Now playing: **${currentSong}**`);
+        await interaction.reply(`🎶 Now playing: **${currentSong}**`);
+        return { success: true, message: 'INTERACTION_ALREADY_HANDLED' };
     } catch (error) {
       logger.error(`Erreur récupération chanson en cours : ${error.message}`);
       return await interaction.reply({

@@ -1,9 +1,7 @@
 // api/routes.js
 import healthRoutes from './routes/health.js';
-import metricsRoutes from './routes/metrics.js';
+
 import playlistRoutes from './routes/playlist-update.js';
-import logsRoutes from './routes/logs.js';
-import alertsRoutes from './routes/alerts.js';
 import silenceRoutes from './routes/silence.js';
 
 export default function loadRoutes (app, client, logger) {
@@ -15,9 +13,7 @@ export default function loadRoutes (app, client, logger) {
       timestamp: new Date().toISOString(),
       endpoints: {
         health: '/v1/health',
-        metrics: '/v1/metrics',
-        logs: '/v1/logs',
-        alerts: '/v1/alerts',
+        
         playlist: '/v1/send-playlist',
         silence: '/v1/silence'
       }
@@ -25,9 +21,7 @@ export default function loadRoutes (app, client, logger) {
   });
 
   app.use('/v1/health', healthRoutes(client, logger));
-  app.use('/v1/metrics', metricsRoutes(client, logger));
-  app.use('/v1/logs', logsRoutes(client, logger));
-  app.use('/v1/alerts', alertsRoutes(client, logger));
+  
   app.use('/v1/send-playlist', playlistRoutes(client, logger));
   app.use('/v1/silence', silenceRoutes(client, logger));
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadCommands } from "../../bot/handlers/loadCommands.js";
+import { loadCommands } from "#bot/bootstrap/loadCommands.js";
 
 // Mocks
 vi.mock('node:fs');
@@ -22,7 +22,7 @@ vi.mock('../../bot/logger.js', () => ({
     debug: vi.fn(), // Ajout pour vérifier les sous-commandes ignorées
   },
 }));
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 
 describe('loadCommands', () => {
   let mockClient;
@@ -73,8 +73,8 @@ describe('loadCommands', () => {
 
       expect(result.loaded).toHaveLength(2);
       expect(result.categories).toEqual({ 'moderation': ['ban'], 'general': ['ping'] });
-      expect(logger.custom).toHaveBeenCalledWith('CMD', 'ban (moderation)');
-      expect(logger.custom).toHaveBeenCalledWith('CMD', 'ping (general)');
+      expect(logger.infomd).toHaveBeenCalledWith('ban (moderation)');
+      expect(logger.infomd).toHaveBeenCalledWith('ping (general)');
     });
   });
 

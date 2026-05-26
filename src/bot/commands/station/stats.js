@@ -6,7 +6,7 @@ import {
 } from 'discord.js';
 import axios from 'axios';
 import config from '../../config.js';
-import logger from '../../logger.js';
+import logger from '#shared/logging/logger.js';
 
 const { ADMIN_ROLE_ID, JSON_URL } = config;
 

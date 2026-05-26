@@ -5,10 +5,10 @@ import rateLimiter, {
   isUserBlocked,
   unblockUser,
   getRateLimitStats,
-} from "../utils/shared/rateLimiter.js";
+} from "#core/services/rateLimiter.js";
 
 // Mock du logger pour éviter les effets de bord
-vi.mock("../bot/logger.js", () => ({
+vi.mock("#shared/logging/logger.js", () => ({
   default: {
     info: vi.fn(),
     error: vi.fn(),

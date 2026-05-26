@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import appState from "../core/services/AppState.js";
 
 // Mock du logger pour éviter les effets de bord
-vi.mock("../bot/logger.js", () => ({
+vi.mock("#shared/logging/logger.js", () => ({
   default: {
     info: vi.fn(),
     error: vi.fn(),

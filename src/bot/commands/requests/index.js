@@ -1,7 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
 import addSubcommand from './requests.js';
-import deleteSubcommand from './requests-delete.js';
-import listSubcommand from './requests-list.js';
 import searchSubcommand from './requests-search.js';
 import config from '../../config.js';
 
@@ -11,8 +9,6 @@ export default {
     .setDescription('Gerer les requests de morceaux')
     .setDMPermission(false)
     .addSubcommand(addSubcommand.builder)
-    .addSubcommand(deleteSubcommand.builder)
-    .addSubcommand(listSubcommand.builder)
     .addSubcommand(searchSubcommand.builder),
 
   async execute (interaction) {
@@ -28,10 +24,6 @@ export default {
     switch (subcommand) {
     case 'add':
       return await addSubcommand.execute(interaction);
-    case 'delete':
-      return await deleteSubcommand.execute(interaction);
-    case 'list':
-      return await listSubcommand.execute(interaction);
     case 'search':
       return await searchSubcommand.execute(interaction);
     default:

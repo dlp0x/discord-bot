@@ -38,7 +38,6 @@ lib-cov
 node_modules/
 jspm_packages/
 bower_components/
-api/
 # ========================================
 # Cache et fichiers temporaires
 # ========================================

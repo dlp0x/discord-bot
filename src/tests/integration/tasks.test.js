@@ -22,7 +22,7 @@ vi.mock("../../bot/logger.js", () => ({
     warn: vi.fn(),
   },
 }));
-import logger from "../../bot/logger.js";
+import logger from '#shared/logging/logger.js';
 
 vi.mock("../../core/monitor.js", () => ({
   default: {

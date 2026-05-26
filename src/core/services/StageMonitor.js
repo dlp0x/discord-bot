@@ -4,7 +4,7 @@
 // ========================================
 
 import { getVoiceConnection } from '@discordjs/voice';
-import logger from '../../bot/logger.js';
+import logger from '#shared/logging/logger.js';
 import stageSpeakerManager from './StageSpeakerManager.js';
 
 class StageMonitor {
@@ -26,7 +26,7 @@ class StageMonitor {
     // (et compatibilite des tests historiques)
     this.disconnectGraceMs = 3000;
 
-    logger.info('StageMonitor initialisé');
+    logger.init('StageMonitor initialisé');
   }
 
   // ========================================
@@ -45,8 +45,8 @@ class StageMonitor {
       void this.checkAllStages();
     }, this.checkInterval);
 
-    logger.info(
-      '🎭 Surveillance des stages démarrée '
+    logger.init(
+      'Surveillance des stages initialisée '
       + `(intervalle: ${this.checkInterval / 1000}s, `
       + `grâce: ${this.disconnectGraceMs / 1000}s)`
     );

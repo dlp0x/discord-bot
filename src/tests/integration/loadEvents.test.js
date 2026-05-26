@@ -28,7 +28,7 @@ vi.mock("../logger.js", () => ({
 }));
 
 const importMock = vi.fn();
-import { loadEvents } from "../../bot/handlers/loadEvents.js";
+import { loadEvents } from "#bot/bootstrap/loadEvents.js";
 import * as fs from "node:fs";
 
 describe("loadEvents", () => {

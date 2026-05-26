@@ -1,9 +1,6 @@
 import { MessageFlags } from 'discord.js';
-import { validateURL } from '../../../utils/bot/validateURL.js';
-import { genres } from '../../../utils/bot/genres.js';
-import { addRequest } from '../../../utils/bot/radioDjApi.js';
-import config from '../../config.js';
-import logger from '../../logger.js';
+import { addRequest } from '#core/services/radioDjApi.js';
+import logger from '#shared/logging/logger.js';
 
 export default {
   builder: (subcommand) =>
@@ -19,58 +16,18 @@ export default {
         option
           .setName('titre')
           .setDescription('Le titre du morceau')
-          .setRequired(true))
-      .addStringOption((option) =>
-        option
-          .setName('lien')
-          .setDescription('URL Youtube ou Spotify')
-          .setRequired(false))
-      .addStringOption((option) =>
-        option
-          .setName('genre')
-          .setDescription('Le genre musical')
-          .setRequired(false)
-          .addChoices(
-            ...genres.map((g) => ({
-              name: g,
-              value: g.toLowerCase().replace(/\s/g, '_')
-            }))
-          )),
+          .setRequired(true)),
 
   async execute (interaction) {
     try {
       const titre = interaction.options.getString('titre');
       const artiste = interaction.options.getString('artiste');
-      const lien = interaction.options.getString('lien');
-      const genre = interaction.options.getString('genre') ?? '';
       const username = interaction.user.tag;
 
-      if (lien && !validateURL(lien)) {
-        return await interaction.reply({
-          content: 'Ton lien n\'est pas valide.',
-          flags: MessageFlags.Ephemeral
-        });
-      }
 
-      await addRequest({ artist: artiste, title: titre });
 
-      const privateChannel = interaction.client.channels.cache.get(
-        config.reqChannelId
-      );
-      if (privateChannel) {
-        const requestMessage = [
-          'Nouvelle request',
-          `- Titre: ${titre}`,
-          `- Artiste: ${artiste}`,
-          `- Lien: ${lien ?? ''}`,
-          `- Genre: ${genre}`,
-          `- Propose par: ${username}`
-        ].join('\n');
+      await addRequest({ artist: artiste, title: titre, requestedBy: username });
 
-        await privateChannel.send(
-          requestMessage
-        );
-      }
 
       return await interaction.reply({
         content: 'Ta demande a ete ajoutee dans RadioDJ.',
@@ -81,7 +38,7 @@ export default {
 
       if (error?.response?.status === 404) {
         return await interaction.reply({
-          content: 'Morceau introuvable dans RadioDJ. Verifie le titre et l\'artiste exacts.',
+          content: 'Morceau introuvable dans RadioDJ. Verifie le titre et l\'artiste exacts avec `/requests search`.',
           flags: MessageFlags.Ephemeral
         });
       }

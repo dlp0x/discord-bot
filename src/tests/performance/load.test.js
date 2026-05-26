@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import logger from "../../bot/logger.js";
+import logger from '#shared/logging/logger.js';
 
 describe("Performance Tests", () => {
   beforeAll(() => {

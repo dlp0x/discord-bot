@@ -47,8 +47,8 @@ vi.mock("../../core/monitor.js", () => ({
 }));
 
 // Imports après les mocks
-import handlePlaylistSelect from "../../bot/handlers/handlePlaylistSelect.js";
-import logger from "../../bot/logger.js";
+import handlePlaylistSelect from "#bot/handlers/PlaylistSelectHandler.js";
+import logger from '#shared/logging/logger.js';
 import errorHandler from "../../core/monitor.js";
 
 describe("handlePlaylistSelect", () => {

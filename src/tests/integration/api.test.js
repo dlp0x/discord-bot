@@ -4,7 +4,7 @@ import express from "express";
 import { createServer } from "http";
 
 // Mock config avant d'importer les routes
-vi.mock("../../bot/config.js", () => ({
+vi.mock("#bot/config.js", () => ({
   default: {
     VOICE_CHANNEL_ID: "stage-channel-id",
     API_TOKEN: "test-api-token",
@@ -46,9 +46,8 @@ vi.mock("fs", () => ({
   mkdirSync: vi.fn(),
 }));
 
-import healthRoute from "../../api/routes/health.js";
-import metricsRoute from "../../api/routes/metrics.js";
-import playlistUpdateRoute from "../../api/routes/playlist-update.js";
+import healthRoute from "#api/routes/health.js";
+import playlistUpdateRoute from "#api/routes/playlist-update.js";
 
 let app;
 let server;
@@ -139,7 +138,6 @@ describe("API Integration Tests", () => {
 
     // Setup routes
     app.use("/health", healthRoute(mockClient, mockLogger));
-    app.use("/metrics", metricsRoute(mockClient, mockLogger));
     app.use("/playlist-update", playlistUpdateRoute(mockClient, mockLogger));
   });
 
@@ -181,58 +179,6 @@ describe("API Integration Tests", () => {
       const response = await request(app).get("/health").expect(200);
       // La route ne retourne pas 500, elle gère l'erreur et retourne 'Unknown'
       expect(response.body.bot).toBe("Unknown");
-    });
-  });
-
-  describe("Metrics Route", () => {
-    it("should return comprehensive metrics", async () => {
-      const response = await request(app).get("/metrics").expect(200);
-
-      expect(response.body).toHaveProperty("system");
-      expect(response.body).toHaveProperty("discord");
-      expect(response.body).toHaveProperty("bot");
-      expect(response.body).toHaveProperty("network");
-    });
-
-    it("should include system metrics", async () => {
-      const response = await request(app).get("/metrics").expect(200);
-
-      const { system } = response.body;
-      expect(system).toHaveProperty("uptime");
-      expect(system).toHaveProperty("memory");
-      expect(system).toHaveProperty("cpu");
-      expect(typeof system.uptime).toBe("number");
-    });
-
-    it("should include Discord metrics", async () => {
-      const response = await request(app).get("/metrics").expect(200);
-
-      const { discord } = response.body;
-      expect(discord).toHaveProperty("guilds");
-      expect(discord).toHaveProperty("ping");
-      expect(discord).toHaveProperty("status");
-      expect(discord.guilds).toBe(2);
-      expect(discord.ping).toBe(25);
-    });
-
-    it("should include bot metrics", async () => {
-      const response = await request(app).get("/metrics").expect(200);
-
-      const { bot } = response.body;
-      // La vraie route retourne commands, voiceConnections, lastActivity
-      expect(bot).toHaveProperty("commands");
-      expect(bot).toHaveProperty("voiceConnections");
-      expect(bot).toHaveProperty("lastActivity");
-      expect(typeof bot.commands).toBe("number");
-    });
-
-    it("should handle metrics collection errors", async () => {
-      // Mock error in metrics collection
-      mockClient.guilds.cache = null;
-
-      const response = await request(app).get("/metrics").expect(200);
-      // La route gère l'erreur et retourne 0 pour guilds
-      expect(response.body.discord.guilds).toBe(0);
     });
   });
 
@@ -379,7 +325,7 @@ describe("API Integration Tests", () => {
     it("should handle metrics collection efficiently", async () => {
       const start = Date.now();
 
-      await request(app).get("/metrics").expect(200);
+      await request(app).get("/health").expect(200);
 
       const duration = Date.now() - start;
       expect(duration).toBeLessThan(1000); // Should respond within 1 second
@@ -388,7 +334,7 @@ describe("API Integration Tests", () => {
 
   describe("API Security", () => {
     it("should not expose sensitive information", async () => {
-      const response = await request(app).get("/metrics").expect(200);
+      const response = await request(app).get("/health").expect(200);
 
       // Should not expose tokens or sensitive data
       expect(JSON.stringify(response.body)).not.toContain("test-token");
@@ -421,4 +367,3 @@ describe("API Integration Tests", () => {
     });
   });
 });
-

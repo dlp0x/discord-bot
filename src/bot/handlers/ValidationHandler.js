@@ -2,11 +2,24 @@
 // bot/events/handlers/ValidationHandler.js - Validation des interactions Discord
 // ========================================
 
-import {
-  validateSuggestion,
-  validateDiscordId,
-  sanitizeString
-} from '../../utils/shared/validation.js';
+import validator from '#shared/validation/validation.js';
+
+function validateDiscordIdSafe (id) {
+  try {
+    validator.validateDiscordId(id);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function validateSuggestion (input) {
+  const sanitized = validator.sanitize(input, { maxLength: 200 });
+  if (!sanitized || sanitized.length < 1) {
+    throw new Error('Invalid suggestion value');
+  }
+  return sanitized;
+}
 
 /**
    * Valider et sanitiser les entrées de l'interaction
@@ -16,11 +29,11 @@ export async function validateInteractionInput (interaction) {
     const userId = interaction.user.id;
 
     // Validation de base
-    if (!validateDiscordId(userId)) {
+    if (!validateDiscordIdSafe(userId)) {
       return { valid: false, error: 'ID utilisateur invalide' };
     }
 
-    if (interaction.guildId && !validateDiscordId(interaction.guildId)) {
+    if (interaction.guildId && !validateDiscordIdSafe(interaction.guildId)) {
       return { valid: false, error: 'ID serveur invalide' };
     }
 
@@ -140,13 +153,13 @@ function validateModerationCommand (interaction, options) {
     return { valid: false, error: 'Utilisateur cible requis' };
   }
 
-  if (!validateDiscordId(targetUser.id)) {
+  if (!validateDiscordIdSafe(targetUser.id)) {
     return { valid: false, error: 'ID utilisateur cible invalide' };
   }
 
   const reason = options.getString('reason');
   if (reason) {
-    const sanitizedReason = sanitizeString(reason, { maxLength: 500 });
+    const sanitizedReason = validator.sanitize(reason, { maxLength: 500 });
     options._hoistedOptions = options._hoistedOptions.map((opt) =>
       opt.name === 'reason' ? { ...opt, value: sanitizedReason } : opt);
   }
@@ -166,7 +179,7 @@ function validateConfigCommand (interaction, options) {
   }
 
   if (configValue) {
-    const sanitizedValue = sanitizeString(configValue, { maxLength: 1000 });
+    const sanitizedValue = validator.sanitize(configValue, { maxLength: 1000 });
     options._hoistedOptions = options._hoistedOptions.map((opt) =>
       opt.name === 'value' ? { ...opt, value: sanitizedValue } : opt);
   }

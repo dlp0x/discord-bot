@@ -51,8 +51,8 @@ describe('Performance Logger', () => {
 
   // 🛠️ Compatibilité (si tu veux vraiment garder les anciens alias)
   it('should maintain backward compatibility', async () => {
-    expect(typeof logger.command).toBe('function');
-    await logger.command('Commande test');
+    expect(typeof logger.infoommand).toBe('function');
+    await logger.infoommand('Commande test');
     const metrics = logger.getMetrics();
     expect(metrics.logsByLevel.CMD).toBe(1);
   });

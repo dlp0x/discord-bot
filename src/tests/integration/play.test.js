@@ -7,7 +7,7 @@ import {
   AudioPlayerStatus,
   NoSubscriberBehavior,
 } from "@discordjs/voice";
-import logger from "../../bot/logger.js";
+import logger from '#shared/logging/logger.js';
 
 // --- Mocks ---
 vi.mock("@discordjs/voice", () => ({
