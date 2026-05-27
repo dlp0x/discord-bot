@@ -39,8 +39,7 @@ export default {
   name: Events.InteractionCreate,
   async execute (interaction) {
     const startTime = Date.now();
-    const db = AppState.db;
-    const client = null; // On utilise toujours interaction.client comme fallback
+    const { client, db } = AppState;
 
     logger.debug(
       `AppState - client: ${client ? 'défini' : 'undefined'}, db: ${

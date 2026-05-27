@@ -6,25 +6,38 @@ export default {
     .setName('ping')
     .setDescription('Renvoie la latence du bot'),
 
-  async execute (interaction) {
+  async execute(interaction) {
     try {
-      const sent = await interaction.reply({
-        content: 'Ping...',
-        fetchReply: true
+      await interaction.reply({
+        content: 'Ping...'
       });
-      const latency = sent.createdTimestamp - interaction.createdTimestamp;
-      const apiLatency = Math.round(interaction.client.ws.ping);
+
+      const sent = await interaction.fetchReply();
+
+      const latency =
+        sent.createdTimestamp - interaction.createdTimestamp;
+
+      const apiLatency =
+        Math.round(interaction.client.ws.ping);
 
       return await interaction.editReply(
         `🏓 Pong !\n🕒 Latence bot: **${latency}ms**\n📡 Latence API: **${apiLatency}ms**`
       );
+
     } catch (error) {
       logger.error('Erreur lors de la commande ping:', error);
+
+      if (interaction.replied || interaction.deferred) {
+        return await interaction.followUp({
+          content: '❌ Erreur lors de la vérification de la latence.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
       return await interaction.reply({
         content: '❌ Erreur lors de la vérification de la latence.',
         flags: MessageFlags.Ephemeral
       });
     }
   }
-};
-
+}; 
