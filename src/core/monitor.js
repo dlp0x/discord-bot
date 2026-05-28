@@ -1,5 +1,5 @@
 // ========================================
-// core/monitor.js - Gestion centralisÃ©e des erreurs et monitoring optimisÃ©
+// core/monitor.js - Gestion centralisée des erreurs et monitoring optimisé
 // ========================================
 
 import { MessageFlags } from 'discord.js';
@@ -21,7 +21,7 @@ class Monitor {
   }
 
   /**
-   * Met Ã  jour les mÃ©triques via AppState
+   * Met à jour les métriques via AppState
    */
   updateMetric (metricName) {
     switch (metricName) {
@@ -49,7 +49,7 @@ class Monitor {
   }
 
   /**
-   * RÃ©cupÃ¨re les mÃ©triques depuis AppState
+   * Récupère les métriques depuis AppState
    */
   getMetrics () {
     const fullState = appState.getFullState();
@@ -287,23 +287,26 @@ class Monitor {
    * GÃ¨re les erreurs critiques avec alerting
    */
   handleCriticalError (error, context = 'unknown') {
-    // VÃ©rifier si c'est une erreur 521
-    if (this.is521Error(error)) {
-      this.handle521Error(error, context);
-      return;
-    }
-
-
-
-    // Notification immÃ©diate
-    this.sendCriticalAlert(error, errorId, context);
-
-    // ArrÃªt gracieux si nÃ©cessaire
-    if (this.shouldShutdown(error)) {
-      this.logger.error('Erreur critique dÃ©tectÃ©e, arrÃªt de l\'application...');
-      process.exit(1);
-    }
+  if (this.is521Error(error)) {
+    this.handle521Error(error, context);
+    return;
   }
+
+  const errorId = generateErrorId();
+
+  this.logger.error(`[${errorId}] Erreur critique [${context}]: ${error.message}`, {
+    errorId,
+    context,
+    stack: error.stack
+  });
+
+  this.sendCriticalAlert(error, errorId, context);
+
+  if (this.shouldShutdown(error)) {
+    this.logger.error('Erreur critique détectée, arrêt de l\'application...');
+    process.exit(1);
+  }
+}
 
   /**
    * GÃ¨re les erreurs de tÃ¢ches planifiÃ©es
