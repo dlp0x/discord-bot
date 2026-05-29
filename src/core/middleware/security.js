@@ -4,7 +4,7 @@
 
 import rateLimiter from '#core/services/rateLimiter.js';
 import validator from '#shared/validation/validation.js';
-import secureLogger from '#shared/logging/secureLogger.js';
+import { secureLog, secureError, secureSecurityAlert, secureAudit, securePerformance } from '#shared/logging/secureLogger.js';
 
 /**
  * Middleware de validation des entrées
@@ -42,7 +42,7 @@ export function validateInput (req, res, next) {
 
     next();
   } catch (error) {
-    secureLogger.secureError('Erreur de validation des entrées', error, {
+    secureError('Erreur de validation des entrées', error, {
       url: req.url,
       method: req.method,
       ip: req.ip
@@ -59,7 +59,7 @@ export function apiRateLimit (req, res, next) {
   const result = rateLimiter.canExecute(clientId, 'api');
 
   if (!result.allowed) {
-    secureLogger.secureSecurityAlert('Rate limit API dépassé', {
+    secureSecurityAlert('Rate limit API dépassé', {
       clientId,
       url: req.url,
       method: req.method,
@@ -110,7 +110,7 @@ export function xssProtection (req, res, next) {
     || checkForXSS(req.query)
     || checkForXSS(req.params)
   ) {
-    secureLogger.secureSecurityAlert('Tentative XSS détectée', {
+      secureSecurityAlert('Tentative XSS détectée', {
       url: req.url,
       method: req.method,
       ip: req.ip,
@@ -150,7 +150,7 @@ export function sqlInjectionProtection (req, res, next) {
     || checkForSQLInjection(req.query)
     || checkForSQLInjection(req.params)
   ) {
-    secureLogger.secureSecurityAlert('Tentative d\'injection SQL détectée', {
+    secureSecurityAlert('Tentative d\'injection SQL détectée', {
       url: req.url,
       method: req.method,
       ip: req.ip,
@@ -199,7 +199,7 @@ export function dosProtection (req, res, next) {
   );
 
   if (recentClientRequests.length >= maxRequests) {
-    secureLogger.secureSecurityAlert('Attaque DoS détectée', {
+    secureSecurityAlert('Attaque DoS détectée', {
       ip: clientIP,
       requests: recentClientRequests.length,
       userAgent: req.get('User-Agent')
@@ -226,7 +226,7 @@ export function timeoutProtection (timeoutMs = 30000) {
   return (req, res, next) => {
     const timeout = setTimeout(() => {
       if (!res.headersSent) {
-        secureLogger.secureSecurityAlert('Timeout de requête', {
+        secureSecurityAlert('Timeout de requête', {
           url: req.url,
           method: req.method,
           ip: req.ip,
@@ -265,7 +265,7 @@ export function validateHeaders (req, res, next) {
   );
 
   if (hasSuspiciousHeaders) {
-    secureLogger.secureSecurityAlert('Headers suspects détectés', {
+    secureSecurityAlert('Headers suspects détectés', {
       url: req.url,
       method: req.method,
       ip: req.ip,
@@ -301,9 +301,9 @@ export function secureRequestLogging (req, res, next) {
 
     // Log selon le statut de la réponse
     if (res.statusCode >= 400) {
-      secureLogger.secureError('Requête échouée', null, logData);
+      secureError('Requête échouée', null, logData);
     } else {
-      secureLogger.secureLog('info', 'Requête traitée', logData);
+      secureLog('info', 'Requête traitée', logData);
     }
   });
 
@@ -328,7 +328,7 @@ export function validatePermissions (requiredPermissions = []) {
           userPermissions.includes(permission));
 
         if (!hasPermission) {
-          secureLogger.secureSecurityAlert(
+          secureSecurityAlert(
             'Tentative d\'accès non autorisé',
             req.user.id,
             {
@@ -345,7 +345,7 @@ export function validatePermissions (requiredPermissions = []) {
 
       next();
     } catch (error) {
-      secureLogger.secureError('Erreur de validation des permissions', error, {
+      secureError('Erreur de validation des permissions', error, {
         url: req.url,
         method: req.method,
         userId: req.user?.id
@@ -368,7 +368,7 @@ export function validateDiscordToken (req, res, next) {
 
     // Valider le format du token
     if (!token.startsWith('MTA') && !token.startsWith('OTk')) {
-      secureLogger.secureSecurityAlert('Token Discord invalide', {
+      secureSecurityAlert('Token Discord invalide', {
         url: req.url,
         method: req.method,
         ip: req.ip
@@ -381,7 +381,7 @@ export function validateDiscordToken (req, res, next) {
     req.discordToken = token;
     next();
   } catch (error) {
-    secureLogger.secureError('Erreur de validation du token Discord', error, {
+    secureError('Erreur de validation du token Discord', error, {
       url: req.url,
       method: req.method,
       ip: req.ip
@@ -422,7 +422,7 @@ export function validateFileUpload (req, res, next) {
       ];
 
       if (!allowedTypes.includes(file.mimetype)) {
-        secureLogger.secureSecurityAlert('Type de fichier non autorisé', {
+        secureSecurityAlert('Type de fichier non autorisé', {
           filename: sanitizedFilename,
           mimetype: file.mimetype,
           size: file.size,
@@ -438,7 +438,7 @@ export function validateFileUpload (req, res, next) {
 
     next();
   } catch (error) {
-    secureLogger.secureError('Erreur de validation de fichier', error, {
+    secureError('Erreur de validation de fichier', error, {
       url: req.url,
       method: req.method,
       ip: req.ip
