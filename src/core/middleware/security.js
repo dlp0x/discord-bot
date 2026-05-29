@@ -4,7 +4,8 @@
 
 import rateLimiter from '#core/services/rateLimiter.js';
 import validator from '#shared/validation/validation.js';
-import { secureLog, secureError, secureSecurityAlert, secureAudit, securePerformance } from '#shared/logging/secureLogger.js';
+import { secureLog, secureError, secureSecurityAlert }
+  from '#shared/logging/secureLogger.js';
 
 /**
  * Middleware de validation des entrées
@@ -110,7 +111,7 @@ export function xssProtection (req, res, next) {
     || checkForXSS(req.query)
     || checkForXSS(req.params)
   ) {
-      secureSecurityAlert('Tentative XSS détectée', {
+    secureSecurityAlert('Tentative XSS détectée', {
       url: req.url,
       method: req.method,
       ip: req.ip,

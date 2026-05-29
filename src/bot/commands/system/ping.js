@@ -6,7 +6,7 @@ export default {
     .setName('ping')
     .setDescription('Renvoie la latence du bot'),
 
-  async execute(interaction) {
+  async execute (interaction) {
     try {
       await interaction.reply({
         content: 'Ping...'
@@ -14,16 +14,15 @@ export default {
 
       const sent = await interaction.fetchReply();
 
-      const latency =
-        sent.createdTimestamp - interaction.createdTimestamp;
+      const latency
+        = sent.createdTimestamp - interaction.createdTimestamp;
 
-      const apiLatency =
-        Math.round(interaction.client.ws.ping);
+      const apiLatency
+        = Math.round(interaction.client.ws.ping);
 
       return await interaction.editReply(
         `🏓 Pong !\n🕒 Latence bot: **${latency}ms**\n📡 Latence API: **${apiLatency}ms**`
       );
-
     } catch (error) {
       logger.error('Erreur lors de la commande ping:', error);
 
@@ -40,4 +39,4 @@ export default {
       });
     }
   }
-}; 
+};

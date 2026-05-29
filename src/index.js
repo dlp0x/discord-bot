@@ -90,7 +90,7 @@ async function startApplication () {
     registerProcessHandlers({ gracefulShutdown });
 
     logger.api(
-      'Routes API disponibles : /v1/health, /v1/logs, /v1/alerts, /v1/send-playlist'
+      'Routes API disponibles : /v1/health, /v1/playlist-update'
     );
     logMemory.execute();
     logger.banner('Bot pret. Logging en cours...');

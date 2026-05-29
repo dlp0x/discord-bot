@@ -18,8 +18,8 @@ export default {
       const currentSong
         = data?.icestats?.source?.title || 'Aucune chanson en cours.';
 
-        await interaction.reply(`🎶 Now playing: **${currentSong}**`);
-        return { success: true, message: 'INTERACTION_ALREADY_HANDLED' };
+      await interaction.reply(`🎶 Now playing: **${currentSong}**`);
+      return { success: true, message: 'INTERACTION_ALREADY_HANDLED' };
     } catch (error) {
       logger.error(`Erreur récupération chanson en cours : ${error.message}`);
       return await interaction.reply({
