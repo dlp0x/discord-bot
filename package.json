@@ -64,13 +64,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/ui": "^4.1.8",
     "dotenv-cli": "^10.0.0",
     "globals": "^16.3.0",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.8"
   },
   "scripts": {
     "start:dev": "dotenv -e .env.dev -- nodemon  --trace-warnings src/index.js",
