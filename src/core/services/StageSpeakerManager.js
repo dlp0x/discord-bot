@@ -9,10 +9,12 @@ class StageSpeakerManager {
   #promotingGuilds = new Set();
 
   constructor () {
+    // 🔥 AJOUT DE MuteMembers : Indispensable pour s'auto-promouvoir sans intervention humaine
     this.requiredPermissions = [
       PermissionFlagsBits.Connect,
       PermissionFlagsBits.Speak,
-      PermissionFlagsBits.RequestToSpeak
+      PermissionFlagsBits.RequestToSpeak,
+      PermissionFlagsBits.MuteMembers 
     ];
 
     logger.init('StageSpeakerManager initialisé');
@@ -27,6 +29,11 @@ class StageSpeakerManager {
       if (!botMember) {
         logger.error('Bot member introuvable dans le guild');
         return { hasPermissions: false, missingPermissions: this.requiredPermissions };
+      }
+
+      // Si le bot est Administrateur, il a toutes les permissions d'office
+      if (botMember.permissions.has(PermissionFlagsBits.Administrator)) {
+        return { hasPermissions: true, missingPermissions: [] };
       }
 
       const channelPermissions = channel.permissionsFor(botMember);
@@ -44,7 +51,7 @@ class StageSpeakerManager {
         missingPermissions
       };
     } catch (error) {
-      logger.error('Erreur lors de la vérification des permissions:', error);
+      logger.error('Erreur lors de la vérification des permissions:', error.message || error);
       return { hasPermissions: false, missingPermissions: this.requiredPermissions };
     }
   }
@@ -60,7 +67,8 @@ class StageSpeakerManager {
       }
 
       const isConnected = botMember.voice.channelId === channel.id;
-      const isSuppressed = botMember.voice.suppress;
+      // Sur Discord, être supprimé (suppress = true) signifie être dans le public.
+      const isSuppressed = botMember.voice.suppress ?? true;
 
       return {
         isConnected,
@@ -69,7 +77,7 @@ class StageSpeakerManager {
         channelId: botMember.voice.channelId
       };
     } catch (error) {
-      logger.error('Erreur lors de la vérification du statut du stage:', error);
+      logger.error('Erreur lors de la vérification du statut du stage:', error.message || error);
       return { isConnected: false, isSpeaker: false, isSuppressed: true, channelId: null };
     }
   }
@@ -99,34 +107,44 @@ class StageSpeakerManager {
         };
       }
 
-      const botMember = channel.guild.members.me;
+      // 🔥 AMÉLIORATION : Forcer un fetch du membre vocal pour obtenir l'état réseau le plus récent
+      const guild = channel.guild;
+      const botMember = await guild.members.fetch(guild.client.user.id).catch(() => guild.members.me);
+
       if (!botMember?.voice?.channelId) {
-        throw new Error('Bot not connected to voice');
+        // Optionnel : Accorder un micro-délai de rattrapage si Discord synchronise l'état
+        await new Promise(resolve => setTimeout(resolve, 250));
+        if (!botMember?.voice?.channelId) {
+          throw new Error('Le bot n\'est pas encore détecté comme connecté au flux vocal par l\'API Discord.js');
+        }
       }
 
+      // Exécuter la demande de parole (devient Speaker)
       await botMember.voice.setSuppressed(false);
 
       return { success: true, message: 'Bot promu en speaker avec succès' };
     } catch (error) {
       let errorType = 'UNKNOWN_ERROR';
-      let userMessage = 'Erreur inconnue lors de la promotion en speaker';
+      let userMessage = error.message || 'Erreur inconnue lors de la promotion en speaker';
 
       if (
         error.code === 50013
         || error.code === 'DiscordAPIError[50013]'
-        || (error.name === 'DiscordAPIError' && error.message.includes('permissions'))
+        || (error.name === 'DiscordAPIError' && error.message.toLowerCase().includes('permission'))
       ) {
         errorType = 'INSUFFICIENT_PERMISSIONS';
-        userMessage = 'Le bot n\'est pas Stage Moderator (permission "Gérer le canal" manquante dans le stage)';
+        userMessage = 'Le bot n\'est pas Modérateur du stage (la permission "Gérer les demandes de parole / Mute Members" est manquante)';
       } else if (error.code === 50001) {
         errorType = 'MISSING_ACCESS';
         userMessage = 'Accès manquant au canal vocal';
-      } else if (error.message.includes('suppressed')) {
-        errorType = 'SUPPRESSION_ERROR';
-        userMessage = 'Erreur lors de la modification du statut de suppression';
       }
 
-      logger.error('Erreur lors de la promotion en speaker:', error);
+      // 🔥 CORRECTION LOGS : Extraction de error.message pour éviter d'afficher un objet vide {}
+      logger.error('Erreur lors de la promotion en speaker:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
 
       return {
         success: false,
@@ -139,7 +157,6 @@ class StageSpeakerManager {
 
   /**
    * Promouvoir le bot en speaker avec verrou anti-doublon.
-   * Remplace l'ancien système promotingStages/pendingPromotions de StageMonitor.
    */
   async promoteToSpeakerGuarded (connection, channel) {
     const guildId = channel.guild.id;
@@ -149,7 +166,6 @@ class StageSpeakerManager {
       return { success: false, message: 'ALREADY_PROMOTING' };
     }
 
-    // Vérifier avant d'acquérir le verrou
     const status = this.getBotStageStatus(channel.guild, channel);
     if (status.isSpeaker) {
       logger.debug(`🎤 Bot déjà speaker dans ${channel.name}`);
@@ -174,7 +190,6 @@ class StageSpeakerManager {
 
       return result;
     } finally {
-      // Délai anti-rebond VoiceStateUpdate
       setTimeout(() => {
         this.#promotingGuilds.delete(guildId);
         logger.debug(`🎤 Verrou de promotion libéré pour ${guildId}`);
@@ -204,7 +219,8 @@ class StageSpeakerManager {
     const permissionNames = {
       [PermissionFlagsBits.Connect]: 'Se connecter',
       [PermissionFlagsBits.Speak]: 'Parler',
-      [PermissionFlagsBits.RequestToSpeak]: 'Demander à parler'
+      [PermissionFlagsBits.RequestToSpeak]: 'Demander à parler',
+      [PermissionFlagsBits.MuteMembers]: 'Gérer les demandes de parole (Mute Members)'
     };
 
     return missingPermissions.map(
@@ -214,5 +230,4 @@ class StageSpeakerManager {
 }
 
 const stageSpeakerManager = new StageSpeakerManager();
-
 export default stageSpeakerManager;
