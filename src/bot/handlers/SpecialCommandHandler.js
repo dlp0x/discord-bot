@@ -45,7 +45,9 @@ async function handlePlayCommand (interaction) {
       createAudioResource,
       AudioPlayerStatus,
       NoSubscriberBehavior,
-      StreamType
+      StreamType,
+      entersState, // À AJOUTER : pour attendre l'état de la connexion
+      VoiceConnectionStatus // À AJOUTER
     } = await import('@discordjs/voice');
     logger.success('Modules audio importés avec succès');
 
@@ -69,6 +71,11 @@ async function handlePlayCommand (interaction) {
         selfDeaf: false
       });
       logger.success('Connexion établie');
+
+      // 🔥 ÉTAPE 1 : Attendre que Discord valide la connexion réseau du bot
+      logger.info('⏳ Attente de l\'état Ready de la connexion...');
+      await entersState(connection, VoiceConnectionStatus.Ready, 5000);
+      logger.success('Connexion vocale Ready');
     } catch (connectionError) {
       logger.error('❌ Erreur de connexion vocale:', {
         message: connectionError.message,
@@ -80,6 +87,20 @@ async function handlePlayCommand (interaction) {
       return;
     }
 
+    // 🔥 ÉTAPE 2 : S'auto-promouvoir Speaker AVANT de générer le moindre son
+    logger.info('🎤 Tentative de promotion en Speaker avant lecture...');
+    let promotionResult = { success: false, message: 'Non exécuté' };
+    try {
+      promotionResult = await stageSpeakerManager.promoteToSpeaker(connection, channel);
+      if (promotionResult.success) {
+        logger.success('🎤 Auto-promotion en speaker réussie (Avant-lecture)');
+      } else {
+        logger.warn('🎤 Auto-promotion échouée avant lecture:', promotionResult.message);
+      }
+    } catch (promotionError) {
+      logger.error('🎤 Erreur critique lors de la promotion initiale:', promotionError);
+    }
+
     logger.info('🎵 Création du player audio...');
     const player = createAudioPlayer({
       behaviors: {
@@ -88,8 +109,6 @@ async function handlePlayCommand (interaction) {
     });
     logger.success('Player créé');
 
-    // StreamType.Arbitrary évite la détection automatique de format
-    // et prévient le TimeoutNegativeWarning de @discordjs/voice
     const AUDIO_INPUT_TYPE = StreamType?.Arbitrary ?? undefined;
 
     logger.info('🎼 Création de la ressource audio...');
@@ -109,6 +128,35 @@ async function handlePlayCommand (interaction) {
       return;
     }
 
+    // 🔥 ÉTAPE 3 : Enregistrer les écouteurs d'événements AVANT de lancer la lecture
+    player.once(AudioPlayerStatus.Playing, async () => {
+      logger.info('🎵 Événement Playing détecté (Le son sort !)');
+      
+      if (promotionResult.success) {
+        await interaction.editReply('▶️ Stream lancé dans le stage channel. 🎤 Bot promu en speaker automatiquement.');
+      } else {
+        const missingPerms = stageSpeakerManager.formatMissingPermissions(
+          promotionResult.missingPermissions || []
+        );
+        const errorMessage = missingPerms.length > 0 ? `Permissions manquantes: ${missingPerms.join(', ')}` : '';
+        await interaction.editReply(
+          `▶️ Stream démarré.\n⚠️ Le bot est peut-être muet (Public) : ${promotionResult.message}\n${errorMessage}`
+        );
+      }
+      logger.success('Message de statut envoyé à l\'utilisateur');
+    });
+
+    player.on('error', async (error) => {
+      logger.error('❌ Erreur du player:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+        streamUrl: STREAM_URL
+      });
+      await interaction.editReply(`❌ Erreur pendant la lecture du stream: ${error.message}`);
+    });
+
+    // 🔥 ÉTAPE 4 : Envoyer la sauce audio
     logger.info('▶️ Lancement de la lecture...');
     player.play(resource);
     connection.subscribe(player);
@@ -120,57 +168,6 @@ async function handlePlayCommand (interaction) {
     stageMonitor.registerStage(channel.guild.id, channel.id, channel.guild);
     logger.info('🎭 Stage enregistré pour surveillance automatique');
 
-    const timeout = setTimeout(() => {
-      logger.warn('⏰ Timeout de 5s atteint');
-      interaction.editReply('⚠️ Aucun son détecté après 5s. Lecture échouée ?');
-    }, 5000);
-
-    player.once(AudioPlayerStatus.Playing, async () => {
-      logger.info('🎵 Événement Playing détecté');
-      clearTimeout(timeout);
-
-      try {
-        const promotionResult = await stageSpeakerManager.promoteToSpeaker(connection, channel);
-
-        if (promotionResult.success) {
-          await interaction.editReply('▶️ Stream lancé dans le stage channel. 🎤 Bot promu en speaker automatiquement.');
-          logger.success('🎤 Auto-promotion en speaker réussie');
-        } else {
-          const missingPerms = stageSpeakerManager.formatMissingPermissions(
-            promotionResult.missingPermissions || []
-          );
-          const errorMessage = missingPerms.length > 0
-            ? `Permissions manquantes: ${missingPerms.join(', ')}`
-            : '';
-          await interaction.editReply(
-            '▶️ Stream lancé dans le stage channel.\n⚠️ Auto-promotion en speaker échouée: '
-            + `${promotionResult.message}\n${errorMessage}`
-          );
-          logger.warn('🎤 Auto-promotion en speaker échouée:', promotionResult.message);
-        }
-      } catch (promotionError) {
-        await interaction.editReply(
-          '▶️ Stream lancé dans le stage channel.\n⚠️ Erreur lors de l\'auto-promotion en speaker.'
-        );
-        logger.error('🎤 Erreur lors de l\'auto-promotion:', promotionError);
-      }
-
-      logger.success('Message de succès envoyé');
-    });
-
-    player.on('error', async (error) => {
-      logger.error('❌ Erreur du player:', {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
-        streamUrl: STREAM_URL
-      });
-      clearTimeout(timeout);
-      await interaction.editReply(
-        `❌ Erreur pendant la lecture du stream: ${error.message}`
-      );
-    });
-
     logger.success('handlePlayCommand terminé avec succès');
   } catch (error) {
     logger.error('❌ Erreur lors du traitement de la commande play:', error);
@@ -179,6 +176,7 @@ async function handlePlayCommand (interaction) {
     });
   }
 }
+
 
 /**
  * Traiter la commande schedule

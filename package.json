@@ -35,6 +35,7 @@
     "glob": "^9.0.0"
   },
   "dependencies": {
+    "dotenv": "^17.2.1",
     "@babel/generator": "^7.28.0",
     "@babel/parser": "^7.28.0",
     "@babel/traverse": "^7.28.0",
@@ -47,7 +48,6 @@
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "discord.js": "^14.26.4",
-    "dotenv": "^17.2.1",
     "eslint": "^9.32.0",
     "express": "^5.1.0",
     "express-rate-limit": "^8.5.1",
