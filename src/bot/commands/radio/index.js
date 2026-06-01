@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
 import playSubcommand from './play.js';
-import stopSubcommand from './stop.js';
 import nowplayingSubcommand from './nowplaying.js';
 import config from '../../config.js';
 
@@ -10,7 +9,6 @@ export default {
     .setDescription('Commandes pour contrôler la radio')
     .setDMPermission(false)
     .addSubcommand(playSubcommand.builder)
-    .addSubcommand(stopSubcommand.builder)
     .addSubcommand(nowplayingSubcommand.builder),
 
   async execute (interaction) {
@@ -30,8 +28,6 @@ export default {
     switch (subcommand) {
     case 'play':
       return await playSubcommand.execute(interaction);
-    case 'stop':
-      return await stopSubcommand.execute(interaction);
     case 'nowplaying':
       return await nowplayingSubcommand.execute(interaction);
     default:

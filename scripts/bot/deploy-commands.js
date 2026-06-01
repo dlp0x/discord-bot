@@ -13,7 +13,7 @@ const isDev = args.includes("--dev");
 const isGlobal = args.includes("--global");
 const shouldClear = args.includes("--clear");
 
-const GUILD_ID = "1404225768992669808";
+const GUILD_ID = process.env.GUILD_ID;
 const CLIENT_ID = process.env.CLIENT_ID;
 const TOKEN = process.env.DISCORD_TOKEN;
 
