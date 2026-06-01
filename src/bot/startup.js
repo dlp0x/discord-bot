@@ -9,7 +9,6 @@ import { loadEvents } from '#bot/bootstrap/loadEvents.js';
 import logger from '#shared/logging/logger.js';
 import updateStatus from './tasks/updateStatus.js';
 import errorHandler from '#core/monitor.js';
-import stageMonitor from '#core/services/StageMonitor.js';
 
 let client = null;
 let updateStatusInterval = null;
@@ -22,7 +21,6 @@ export async function startBot () {
     await loadEvents(client);
     await connectBot();
     startUpdateStatus();
-    stageMonitor.startMonitoring();
 
     return client;
   } catch (error) {
@@ -85,8 +83,6 @@ export async function stopBot () {
     if (updateStatusInterval) {
       clearInterval(updateStatusInterval);
     }
-
-    stageMonitor.stopMonitoring();
 
     if (client) {
       await client.destroy();

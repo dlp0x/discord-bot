@@ -5,7 +5,7 @@
 
 import cache from '#core/services/CacheService.js';
 import * as radio from './radioPlaybackService.js';
-import stageMonitor from '../../core/services/StageMonitor.js';
+
 
 let serviceContainer = null;
 
@@ -16,8 +16,7 @@ export function createServices () {
 
   serviceContainer = {
     cache,
-    radio,
-    stage: stageMonitor
+    radio
   };
 
   return serviceContainer;

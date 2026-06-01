@@ -4,7 +4,6 @@
 
 import { Events } from 'discord.js';
 import logger from '#shared/logging/logger.js';
-import stageMonitor from '#core/services/StageMonitor.js';
 import { handleJoinToCreate } from '../services/tempVcService.js';
 
 export default {
@@ -12,7 +11,6 @@ export default {
   async execute (oldState, newState) {
     try {
       // Gérer les changements d'état vocal pour le monitoring des stages
-      stageMonitor.handleVoiceStateUpdate(oldState, newState);
 
       // Gérer le système Join-to-Create des salons temporaires
       await handleJoinToCreate(oldState, newState);
