@@ -1,6 +1,6 @@
 {
   "name": "soundshine-bot",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "soundSHINE Bot for Discord",
   "homepage": "https://github.com/n3m01726/soundshine-bot#readme",
   "bugs": {
@@ -64,13 +64,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
     "dotenv-cli": "^10.0.0",
     "globals": "^16.3.0",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
-    "vitest": "^3.2.4"
+    "vitest": ">=4.1.0"
   },
   "scripts": {
     "start:dev": "dotenv -e .env.dev -- nodemon  --trace-warnings src/index.js",
@@ -82,19 +80,8 @@
     "db:deploy": "node scripts/dev/init-db.js",
     "git-actions": "node scripts/git/git-actions.js",
     "test": "vitest --config src/config/vitest.config.js",
-    "test:coverage": "vitest --coverage --config src/config/vitest.config.js",
-    "test:integration": "vitest src/tests/integration/ --config src/config/vitest.config.js",
-    "test:performance": "vitest src/tests/performance/ --config src/config/vitest.config.js",
-    "test:stress": "vitest src/tests/stress/ --config src/config/vitest.config.js",
-    "test:security": "vitest src/tests/security.test.js --config src/config/vitest.config.js",
-    "test:all": "node scripts/dev/run-tests.js",
-    "test:ui": "vitest --ui --config src/config/vitest.config.js",
     "lint": "eslint src/bot src/api src/core --config src/config/eslint.config.js",
     "lint:fix": "eslint src/bot src/api src/core --config src/config/eslint.config.js --fix",
-    "security:audit": "node scripts/infra/security-check.js",
-    "security:check": "npm run security:audit && npm run test:security",
-    "context": "node ./scripts/tools/projectContext.js",
-    "context:md": "node ./scripts/tools/projectContext.js --md",
     "context:full": "node ./scripts/tools/projectContext.js --md --full"
   },
   "imports": {

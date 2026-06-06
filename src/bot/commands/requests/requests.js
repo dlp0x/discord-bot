@@ -1,5 +1,5 @@
 import { MessageFlags } from 'discord.js';
-import { addRequest } from '#core/services/radioDjApi.js';
+import { addRequest } from '#api/services/radioDjApi.js';
 import logger from '#shared/logging/logger.js';
 
 export default {

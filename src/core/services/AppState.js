@@ -2,7 +2,7 @@ import StateStorage from './StateStorage.js';
 import StateNotifier from './StateNotifier.js';
 import StateHealthChecker from './StateHealthChecker.js';
 import logger from '../../shared/logging/logger.js';
-import { startMetricsPolling, stopMetricsPolling } from './metrics.js';
+import { startMetricsPolling, stopMetricsPolling } from './metricsManager.js';
 
 class AppStateService {
   #storage = new StateStorage();
@@ -100,7 +100,6 @@ class AppStateService {
     this.#notifier.notify('config', this.config);
   }
 
-  // === System State (auto-pollé via metrics.js)
   updateSystemMetrics () {
     this.#storage.updateSystemMetrics();
     this.#notifier.notify('system', this.system);
