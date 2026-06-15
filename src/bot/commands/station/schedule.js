@@ -60,6 +60,7 @@ export default {
 
       collector.on('collect', async (i) => {
         if (i.customId === 'schedule_fr') {
+          logger.debug(`Collector reçu: ${i.customId}`);
           await i.update({
             embeds: [
               new EmbedBuilder()
@@ -70,6 +71,7 @@ export default {
             components: []
           });
         } else if (i.customId === 'schedule_en') {
+          logger.debug(`Collector reçu: ${i.customId}`);
           await i.update({
             embeds: [
               new EmbedBuilder()
