@@ -64,7 +64,7 @@ async function handleSuggestionButton (interaction) {
  */
 async function handleScheduleButton (interaction, customId) {
   const scheduleService = (
-    await import('../../core/services/ScheduleService.js')
+    await import('#core/services/ScheduleService.js')
   ).default;
   const { EmbedBuilder } = await import('discord.js');
 
@@ -76,7 +76,7 @@ async function handleScheduleButton (interaction, customId) {
       new EmbedBuilder()
         .setColor(language === 'fr' ? 0xf1c40f : 0x2ecc71)
         .setTitle(schedule.title)
-        .setDescription(schedule.content)
+        .setDescription(schedule.content || 'Aucune donnée disponible.')
     ],
     components: []
   });

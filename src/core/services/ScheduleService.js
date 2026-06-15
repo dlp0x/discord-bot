@@ -5,7 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import logger from '../../shared/logging/logger.js';
+import logger from '#shared/logging/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +15,7 @@ class ScheduleService {
     this.cache = new Map();
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
     this.lastCacheUpdate = 0;
-    this.schedulePath = path.join(__dirname, '../../data/schedule.txt');
+    this.schedulePath = path.join(__dirname, '../../data/schedule.json');
   }
 
   /**
@@ -40,7 +40,14 @@ class ScheduleService {
       }
 
       const scheduleData = fs.readFileSync(this.schedulePath, 'utf-8');
-      const schedule = JSON.parse(scheduleData);
+      let schedule;
+try {
+  schedule = JSON.parse(scheduleData);
+} catch (error) {
+  logger.error('Schedule JSON invalide:', error);
+  return this.getDefaultSchedule();
+}
+      
 
       // Validation basique
       if (
@@ -71,6 +78,8 @@ class ScheduleService {
     try {
       const schedule = await this.loadSchedule();
       const langSchedule = schedule.schedules[language];
+      console.log('language:', language);
+console.log('langSchedule:', langSchedule);
 
       if (!langSchedule) {
         logger.warn(
