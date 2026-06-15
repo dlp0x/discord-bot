@@ -1,0 +1,31 @@
+{
+    "version": "1.0",
+    "schedules": {
+      "fr": {
+        "title": "Horaire (Version Française)",
+        "description": "Programme de la semaine",
+        "content": [
+          "Lundi:",
+          "Mardi:",
+          "Mercredi:",
+          "Jeudi:",
+          "Vendredi:",
+          "Samedi:",
+          "Dimanche:"
+        ]
+      },
+      "en": {
+        "title": "Schedule (English version)",
+        "description": "Weekly program",
+        "content": [
+          "Monday:",
+          "Tuesday:",
+          "Wednesday:",
+          "Thursday:",
+          "Friday:",
+          "Saturday:",
+          "Sunday:"
+        ]
+      }
+    }
+  }
