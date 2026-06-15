@@ -4,22 +4,22 @@ import playlistRoutes from './routes/playlist-update.js';
 
 
 export default function loadRoutes (app, client, logger) {
-  app.get('/', (req, res) => {
+  app.get('/v1', (req, res) => {
     res.json({
       name: 'soundSHINE Bot API',
       version: '1.0.0',
       status: 'online',
       timestamp: new Date().toISOString(),
       endpoints: {
-        health: '/v1/health',
-        playlist: '/v1/playlist-update',
+        health: '/health',
+        playlist: '/playlist-update',
         
       }
     });
   });
 
-  app.use('/v1/health', healthRoutes(client, logger));
-  app.use('/v1/playlist-update', playlistRoutes(client, logger));
+  app.use('/health', healthRoutes(client, logger));
+  app.use('/playlist-update', playlistRoutes(client, logger));
 
   // 404
   app.use((req, res) => {

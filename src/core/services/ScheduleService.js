@@ -15,7 +15,7 @@ class ScheduleService {
     this.cache = new Map();
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
     this.lastCacheUpdate = 0;
-    this.schedulePath = path.join(__dirname, '../../data/schedule.json');
+    this.schedulePath = path.join(__dirname, '../../data/schedule.txt');
   }
 
   /**
@@ -35,7 +35,7 @@ class ScheduleService {
 
       // Lire le fichier JSON
       if (!fs.existsSync(this.schedulePath)) {
-        logger.error('Fichier schedule.json introuvable');
+        logger.error('Fichier schedule.txt introuvable');
         return this.getDefaultSchedule();
       }
 

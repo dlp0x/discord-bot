@@ -82,7 +82,8 @@
     "test": "vitest --config src/config/vitest.config.js",
     "lint": "eslint src/bot src/api src/core --config src/config/eslint.config.js",
     "lint:fix": "eslint src/bot src/api src/core --config src/config/eslint.config.js --fix",
-    "context:full": "node ./scripts/tools/projectContext.js --md --full"
+    "context:full": "node ./scripts/tools/projectContext.js --md --full",
+    "tree": "node ./scripts/tools/tree.js"
   },
   "imports": {
     "#shared/*": "./src/shared/*",
