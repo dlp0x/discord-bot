@@ -2,13 +2,39 @@ import express from 'express';
 import botConfig from '#bot/config.js';
 import { z } from 'zod';
 import logger from '#shared/logging/logger.js';
+import { publishPlaylistUpdate } from '#api/services/socialPublishService.js';
 
 const { VOICE_CHANNEL_ID, API_TOKEN, PLAYLIST_CHANNEL_ID } = botConfig;
 
+// Coerce the incoming `social` value (boolean, string, missing, ...) into a
+// real boolean. Anything falsy/unrecognized/omitted defaults to false.
+const socialFlagSchema = z.preprocess((val) => {
+  if (typeof val === 'boolean') return val;
+  if (typeof val === 'string') return val.trim().toLowerCase() === 'true';
+  return false;
+}, z.boolean());
+
 const playlistSchema = z.object({
   playlist: z.string().min(1, 'Playlist is required'),
-  topic: z.string().min(1, 'Topic is required')
+  topic: z.string().min(1, 'Topic is required'),
+  social: socialFlagSchema.default(false)
 });
+
+/**
+ * Fires the social orchestration entry point without letting failures
+ * affect the Discord update flow or the API response. The entry point
+ * itself already catches Templated-specific failures and returns a
+ * normalized result, so this is a defense-in-depth backstop.
+ */
+const triggerSocialPlaceholder = async ({ playlist, topic }) => {
+  try {
+    await publishPlaylistUpdate({ playlist, topic });
+  } catch (socialErr) {
+    await logger.error(
+      `⚠️ [social] Social orchestration failed (ignored, Discord update unaffected): ${socialErr.message}`
+    );
+  }
+};
 
 // Fonction pour essayer de récupérer les caractères corrompus
 const tryFixEncoding = async (text) => {
@@ -184,7 +210,7 @@ export default (client) => {
           details: parseResult.error.errors
         });
       }
-      const { playlist, topic } = parseResult.data;
+      const { playlist, topic, social } = parseResult.data;
 
       // Normalisation des textes pour gérer les accents
       const normalizedPlaylist = await ensureAccentEncoding(playlist);
@@ -322,6 +348,11 @@ export default (client) => {
         // Si au moins l'embed a fonctionné, on peut continuer
         if (playlistSent) {
           await logger.info('⚠️ Embed envoyé mais stage channel échoué');
+
+          if (social === true) {
+            await triggerSocialPlaceholder({ playlist: normalizedPlaylist, topic: normalizedTopic });
+          }
+
           return res.status(200).json({
             status: 'PARTIAL',
             message: 'Playlist envoyée mais échec du stage channel.',
@@ -339,6 +370,11 @@ export default (client) => {
       }
 
       await logger.info('=== TRAITEMENT TERMINÉ AVEC SUCCÈS ===');
+
+      if (social === true) {
+        await triggerSocialPlaceholder({ playlist: normalizedPlaylist, topic: normalizedTopic });
+      }
+
       return res.status(200).json({
         status: 'OK',
         message: 'Playlist et stage mis à jour avec succès.',

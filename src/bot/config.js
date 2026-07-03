@@ -112,6 +112,9 @@ const envSchema = z.object({
   JSON_URL: optionalUrlSchema(),
   RADIODJ_API_URL: optionalUrlSchema(),
   RADIODJ_API_KEY: optionalStringSchema(),
+  TEMPLATED_API_KEY: optionalStringSchema(),
+  TEMPLATED_TEMPLATE_ID: optionalStringSchema(),
+  TEMPLATED_API_BASE_URL: optionalUrlSchema(),
   API_TOKEN: optionalStringSchema(),
   API_PORT: numericStringWithDefault('3000').default('3000'),
   LOG_LEVEL: z
@@ -173,6 +176,9 @@ function buildConfig () {
     JSON_URL: env.JSON_URL,
     RADIODJ_API_URL: env.RADIODJ_API_URL,
     RADIODJ_API_KEY: env.RADIODJ_API_KEY,
+    TEMPLATED_API_KEY: env.TEMPLATED_API_KEY,
+    TEMPLATED_TEMPLATE_ID: env.TEMPLATED_TEMPLATE_ID,
+    TEMPLATED_API_BASE_URL: env.TEMPLATED_API_BASE_URL,
 
     API_TOKEN: env.API_TOKEN,
     API_PORT: env.API_PORT,
@@ -231,7 +237,10 @@ function buildConfig () {
       streamUrl: env.STREAM_URL,
       jsonUrl: env.JSON_URL,
       radioDjUrl: env.RADIODJ_API_URL,
-      radioDjKey: env.RADIODJ_API_KEY
+      radioDjKey: env.RADIODJ_API_KEY,
+      templatedApiKey: env.TEMPLATED_API_KEY,
+      templatedTemplateId: env.TEMPLATED_TEMPLATE_ID,
+      templatedApiBaseUrl: env.TEMPLATED_API_BASE_URL
     },
 
     hasUnsplash () {
@@ -240,6 +249,10 @@ function buildConfig () {
 
     hasStreamService () {
       return !!(this.STREAM_URL && this.JSON_URL);
+    },
+
+    hasTemplated () {
+      return !!(this.TEMPLATED_API_KEY && this.TEMPLATED_TEMPLATE_ID);
     },
 
     validateServices () {
@@ -261,7 +274,9 @@ function buildConfig () {
     'STREAM_URL',
     'JSON_URL',
     'RADIODJ_API_URL',
-    'RADIODJ_API_KEY'
+    'RADIODJ_API_KEY',
+    'TEMPLATED_API_KEY',
+    'TEMPLATED_TEMPLATE_ID'
   ].filter((key) => !config[key]);
 
   if (missingOptionalVars.length > 0 && config.NODE_ENV !== 'test') {
