@@ -1,347 +1,211 @@
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
-// Variables d'environnement pour les tests
-process.env.DISCORD_TOKEN = "test-token";
-process.env.CLIENT_ID = "test-client-id";
-process.env.GUILD_ID = "test-guild-id";
-process.env.VOICE_CHANNEL_ID = "test-voice-channel";
-process.env.PLAYLIST_CHANNEL_ID = "test-playlist-channel";
-process.env.API_TOKEN = "test-api-token";
-process.env.API_PORT = "3000";
-process.env.LOG_LEVEL = "info";
-process.env.UNSPLASH_ACCESS_KEY = "test-unsplash-key";
-process.env.STREAM_URL = "http://test-stream-url.com";
-process.env.JSON_URL = "http://test-json-url.com";
-process.env.ADMIN_ROLE_ID = "test-admin-role-id";
-process.env.NODE_ENV = "test";
+process.env.NODE_ENV = 'test';
+process.env.DISCORD_TOKEN = 'test-token';
+process.env.CLIENT_ID = 'test-client-id';
+process.env.GUILD_ID = '123456789012345678';
+process.env.ADMIN_ROLE_ID = '987654321098765432';
+process.env.REQ_ROLE_ID = '222222222222222222';
+process.env.PLAYLIST_CHANNEL_ID = '333333333333333333';
+process.env.VOICE_CHANNEL_ID = '444444444444444444';
+process.env.API_TOKEN = 'test-api-token';
+process.env.API_PORT = '3000';
+process.env.LOG_LEVEL = 'error';
+process.env.JSON_URL = 'https://icecast.example.test/status-json.xsl';
+process.env.STREAM_URL = 'https://stream.example.test/live.mp3';
+process.env.RADIODJ_API_URL = 'https://radiodj.example.test/api';
+process.env.RADIODJ_API_KEY = 'radiodj-key';
 
-// Mock global pour fetch si nécessaire
-global.fetch =
-  global.fetch ||
-  (() =>
-    Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({}),
-    }));
+class ChainableBuilder {
+  constructor () {
+    this.data = {};
+  }
 
-// Mock Discord.js
-vi.mock("discord.js", () => ({
-  Client: vi.fn().mockImplementation(() => ({
-    login: vi.fn(),
-    on: vi.fn(),
-    once: vi.fn(),
-    user: {
-      setActivity: vi.fn(),
-      setPresence: vi.fn(),
-    },
-    guilds: {
-      cache: new Map(),
-    },
-  })),
-  GatewayIntentBits: {
-    Guilds: 1,
-    GuildMessages: 2,
-    MessageContent: 4,
-  },
-  ActivityType: {
-    Playing: 0,
-    Streaming: 1,
-    Listening: 2,
-    Watching: 3,
-    Competing: 5,
-  },
-  MessageFlags: {
-    Ephemeral: 64,
-  },
+  setName (name) {
+    this.data.name = name;
+    this.name = name;
+    return this;
+  }
+
+  setDescription (description) {
+    this.data.description = description;
+    this.description = description;
+    return this;
+  }
+
+  setDMPermission (value) {
+    this.data.dmPermission = value;
+    return this;
+  }
+
+  setDefaultMemberPermissions (value) {
+    this.data.defaultMemberPermissions = value;
+    return this;
+  }
+
+  addSubcommand (subcommand) {
+    const value = typeof subcommand === 'function'
+      ? subcommand(new ChainableBuilder())
+      : subcommand;
+    this.data.subcommands = [...(this.data.subcommands || []), value];
+    return this;
+  }
+
+  addStringOption (callback) {
+    if (callback) callback(new ChainableBuilder());
+    return this;
+  }
+
+  addIntegerOption (callback) {
+    if (callback) callback(new ChainableBuilder());
+    return this;
+  }
+
+  addBooleanOption (callback) {
+    if (callback) callback(new ChainableBuilder());
+    return this;
+  }
+
+  addChannelOption (callback) {
+    if (callback) callback(new ChainableBuilder());
+    return this;
+  }
+
+  addChannelTypes (...types) {
+    this.data.channelTypes = types;
+    return this;
+  }
+
+  setRequired (value) {
+    this.data.required = value;
+    return this;
+  }
+
+  setMinValue (value) {
+    this.data.minValue = value;
+    return this;
+  }
+
+  setMaxValue (value) {
+    this.data.maxValue = value;
+    return this;
+  }
+
+  setCustomId (customId) {
+    this.data.customId = customId;
+    return this;
+  }
+
+  setLabel (label) {
+    this.data.label = label;
+    return this;
+  }
+
+  setStyle (style) {
+    this.data.style = style;
+    return this;
+  }
+
+  setURL (url) {
+    this.data.url = url;
+    return this;
+  }
+
+  setValue (value) {
+    this.data.value = value;
+    return this;
+  }
+
+  setTitle (title) {
+    this.data.title = title;
+    return this;
+  }
+
+  addComponents (...components) {
+    this.data.components = components.flat();
+    return this;
+  }
+
+  toJSON () {
+    return this.data;
+  }
+}
+
+class EmbedBuilder extends ChainableBuilder {
+  setColor (color) {
+    this.data.color = color;
+    return this;
+  }
+
+  setDescription (description) {
+    this.data.description = description;
+    return this;
+  }
+
+  addFields (...fields) {
+    this.data.fields = fields.flat();
+    return this;
+  }
+
+  setFooter (footer) {
+    this.data.footer = footer;
+    return this;
+  }
+
+  setTimestamp (timestamp = new Date()) {
+    this.data.timestamp = timestamp;
+    return this;
+  }
+}
+
+vi.mock('discord.js', () => ({
+  ActionRowBuilder: ChainableBuilder,
+  ButtonBuilder: ChainableBuilder,
+  EmbedBuilder,
+  ModalBuilder: ChainableBuilder,
+  SlashCommandBuilder: ChainableBuilder,
+  SlashCommandSubcommandBuilder: ChainableBuilder,
+  StringSelectMenuBuilder: ChainableBuilder,
+  TextInputBuilder: ChainableBuilder,
+  ActivityType: { Listening: 2, Playing: 0, Streaming: 1, Watching: 3 },
+  ButtonStyle: { Primary: 1, Secondary: 2, Success: 3, Danger: 4, Link: 5 },
+  ChannelType: { GuildVoice: 2, GuildCategory: 4 },
+  MessageFlags: { Ephemeral: 64 },
   PermissionFlagsBits: {
-    Connect: 1,
-    Speak: 2,
-    RequestToSpeak: 3,
+    Connect: 1n << 20n,
+    DeafenMembers: 1n << 23n,
+    ManageChannels: 1n << 4n,
+    ManageGuild: 1n << 5n,
+    MoveMembers: 1n << 24n,
+    MuteMembers: 1n << 22n,
+    Speak: 1n << 21n,
+    ViewChannel: 1n << 10n
   },
-  SlashCommandBuilder: vi.fn().mockImplementation(() => {
-    let _name = "";
-    let _description = "";
-    const builder = {};
-    builder.setName = vi.fn((name) => {
-      _name = name;
-      return builder;
-    });
-    builder.setDescription = vi.fn((desc) => {
-      _description = desc;
-      return builder;
-    });
-    builder.addStringOption = vi.fn(() => builder);
-    builder.addIntegerOption = vi.fn(() => builder);
-    builder.addBooleanOption = vi.fn(() => builder);
-    builder.addUserOption = vi.fn(() => builder);
-    builder.addChannelOption = vi.fn(() => builder);
-    builder.addRoleOption = vi.fn(() => builder);
-    builder.addMentionableOption = vi.fn(() => builder);
-    builder.addAttachmentOption = vi.fn(() => builder);
-    builder.setDMPermission = vi.fn(() => builder);
-    builder.setDefaultMemberPermissions = vi.fn(() => builder);
-    builder.toJSON = vi.fn(() => ({ name: _name, description: _description }));
-    Object.defineProperty(builder, "name", {
-      get: () => _name,
-      configurable: true,
-    });
-    Object.defineProperty(builder, "description", {
-      get: () => _description,
-      configurable: true,
-    });
-    return builder;
-  }),
-  EmbedBuilder: vi.fn().mockImplementation(() => ({
-    setTitle: vi.fn().mockReturnThis(),
-    setDescription: vi.fn().mockReturnThis(),
-    setColor: vi.fn().mockReturnThis(),
-    addFields: vi.fn().mockReturnThis(),
-    setTimestamp: vi.fn().mockReturnThis(),
-    setFooter: vi.fn().mockReturnThis(),
-    toJSON: vi.fn().mockReturnValue({}),
-  })),
-  ActionRowBuilder: vi.fn().mockImplementation(() => ({
-    addComponents: vi.fn().mockReturnThis(),
-    toJSON: vi.fn().mockReturnValue({}),
-  })),
-  StringSelectMenuBuilder: vi.fn().mockImplementation(() => ({
-    setCustomId: vi.fn().mockReturnThis(),
-    setPlaceholder: vi.fn().mockReturnThis(),
-    addOptions: vi.fn().mockReturnThis(),
-    toJSON: vi.fn().mockReturnValue({}),
-  })),
-  ButtonBuilder: vi.fn().mockImplementation(() => ({
-    setCustomId: vi.fn().mockReturnThis(),
-    setLabel: vi.fn().mockReturnThis(),
-    setStyle: vi.fn().mockReturnThis(),
-    setURL: vi.fn().mockReturnThis(),
-    toJSON: vi.fn().mockReturnValue({}),
-  })),
-  ButtonStyle: {
-    Primary: 1,
-    Secondary: 2,
-    Success: 3,
-    Danger: 4,
-    Link: 5,
-  },
+  TextInputStyle: { Short: 1, Paragraph: 2 }
 }));
 
-// Mock Node modules
-vi.mock("fs", () => ({
-  readdirSync: vi.fn(),
-  statSync: vi.fn(),
-  existsSync: vi.fn(),
+vi.mock('@discordjs/voice', () => ({
+  NoSubscriberBehavior: { Pause: 'pause' },
+  StreamType: { Arbitrary: 'arbitrary' },
+  createAudioPlayer: vi.fn(() => ({
+    play: vi.fn(),
+    stop: vi.fn()
+  })),
+  createAudioResource: vi.fn((url, options) => ({ url, options })),
+  getVoiceConnection: vi.fn(() => null),
+  joinVoiceChannel: vi.fn(() => ({
+    subscribe: vi.fn(),
+    destroy: vi.fn()
+  }))
+}));
+
+vi.mock('#shared/logging/logger.js', () => ({
   default: {
-    readdirSync: vi.fn(),
-    statSync: vi.fn(),
-    existsSync: vi.fn(),
-  },
+    banner: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    success: vi.fn(),
+    warn: vi.fn()
+  }
 }));
-
-vi.mock("path", () => ({
-  join: vi.fn(),
-  extname: vi.fn(),
-  dirname: vi.fn((path) => path.split("/").slice(0, -1).join("/")),
-  default: {
-    join: vi.fn(),
-    extname: vi.fn(),
-    dirname: vi.fn((path) => path.split("/").slice(0, -1).join("/")),
-  },
-}));
-
-// Mock utils/errorHandler
-// vi.mock('../utils/errorHandler.js', () => ({
-//   default: {
-//     handleInteractionError: vi.fn(),
-//     handleMessageError: vi.fn(),
-//     handleGeneralError: vi.fn(),
-//     handleCommandError: vi.fn(),
-//     handleCriticalError: vi.fn()
-//   }
-// }));
-
-// Mock handlers/handlePlaylistSelect
-// vi.mock('../handlers/handlePlaylistSelect.js', () => ({
-//   default: vi.fn().mockResolvedValue(true)
-// }));
-
-// Mock utils modules
-vi.mock("../utils/validateURL.js", () => ({
-  validateURL: vi.fn().mockImplementation((url) => {
-    if (!url) return false;
-    if (typeof url !== "string") return false;
-
-    // URLs YouTube valides
-    if (url.includes("youtube.com/watch") || url.includes("youtu.be/"))
-      return true;
-
-    // URLs Spotify valides (corriger pour inclure open.spotify.com)
-    if (
-      url.includes("open.spotify.com/track") ||
-      url.includes("open.spotify.com/playlist") ||
-      url.includes("open.spotify.com/album")
-    )
-      return true;
-
-    // URLs Twitch valides
-    if (url.includes("twitch.tv/")) return true;
-
-    // Cas spéciaux pour les tests
-    if (url === "https://youtube.com") return false; // Test edge case
-    if (url === "invalid-url") return false;
-    if (url === "not-a-url") return false;
-    if (url === "http://invalid-domain.com") return false;
-    if (url === "https://youtube.com/invalid") return false;
-    if (url === "https://spotify.com/invalid") return false;
-    if (url === "ftp://example.com/file.mp3") return false;
-
-    return false;
-  }),
-}));
-
-vi.mock("../utils/checkStreamOnline.js", () => ({
-  checkStreamOnline: vi.fn().mockImplementation(async (url) => {
-    if (!url) return false;
-
-    // Cas spéciaux pour les tests
-    if (url === "https://twitch.tv/testuser") {
-      // Vérifier si fetch est mocké pour simuler différents comportements
-      if (global.fetch) {
-        try {
-          const response = await global.fetch(url);
-          const data = await response.json();
-          return data.isLive;
-        } catch {
-          // Intentionally empty: error handled silently
-        }
-      }
-      return true; // Comportement par défaut
-    }
-
-    if (url === "invalid-url") return false;
-
-    // Comportement par défaut
-    if (url.includes("twitch.tv/")) return true;
-    return false;
-  }),
-}));
-
-vi.mock("../utils/genres.js", () => ({
-  genres: [
-    { name: "Pop", emoji: "🎵" },
-    { name: "Rock", emoji: "🎸" },
-    { name: "Jazz", emoji: "🎷" },
-    { name: "Classical", emoji: "🎻" },
-    { name: "Electronic", emoji: "🎧" },
-    { name: "Hip-Hop", emoji: "🎤" },
-    { name: "Country", emoji: "🤠" },
-    { name: "Blues", emoji: "🎼" },
-    { name: "Folk", emoji: "🪕" },
-    { name: "R&B", emoji: "🎹" },
-    { name: "Metal", emoji: "🤘" },
-  ],
-}));
-
-vi.mock("../utils/bot/cache.js", () => {
-  const storage = {};
-  const expirations = {};
-
-  const cache = {
-    set: vi.fn().mockImplementation((key, value, ttl) => {
-      storage[key] = value;
-      if (ttl) {
-        expirations[key] = Date.now() + ttl;
-      }
-    }),
-    get: vi.fn().mockImplementation((key) => {
-      // Vérifier l'expiration
-      if (expirations[key] && Date.now() > expirations[key]) {
-        delete storage[key];
-        delete expirations[key];
-        return null;
-      }
-      return storage[key] || null;
-    }),
-    clear: vi.fn().mockImplementation((key) => {
-      if (typeof key === "undefined") {
-        Object.keys(storage).forEach((entryKey) => delete storage[entryKey]);
-        Object.keys(expirations).forEach((entryKey) => delete expirations[entryKey]);
-        return;
-      }
-
-      delete storage[key];
-      delete expirations[key];
-    }),
-    getOrSet: vi.fn().mockImplementation(async (key, fetcher, ttl) => {
-      const existing = cache.get(key);
-      if (existing !== null) {
-        return existing;
-      }
-
-      const value = await fetcher();
-      cache.set(key, value, ttl);
-      return value;
-    }),
-    getStats: vi.fn().mockReturnValue({
-      size: Object.keys(storage).length,
-      hits: 0,
-      misses: 0,
-      hitRate: 0,
-    }),
-  };
-
-  return {
-    cache,
-    default: cache,
-  };
-});
-
-vi.mock("../utils/database.js", () => ({
-  database: {
-    query: vi.fn().mockResolvedValue([]),
-    connect: vi.fn().mockResolvedValue(true),
-    disconnect: vi.fn().mockResolvedValue(true),
-  },
-}));
-
-// Mock core/config
-vi.mock("../core/config.js", () => ({
-  default: {
-    DISCORD_TOKEN: "test-token",
-    CLIENT_ID: "test-client-id",
-    API_PORT: 3000,
-    BOT_TOKEN: "test-bot-token",
-    UNSPLASH_ACCESS_KEY: "test-unsplash-key",
-    STREAM_URL: "test-stream-url",
-    JSON_URL: "test-json-url",
-    ICECAST_HISTORY_URL: "test-icecast-url",
-    ADMIN_ROLE_ID: "test-admin-role",
-    VOICE_CHANNEL_ID: "test-voice-channel",
-    PLAYLIST_CHANNEL_ID: "test-playlist-channel",
-    API_TOKEN: "test-api-token",
-    BOT_ROLE_NAME: "soundSHINE",
-    DEV_GUILD_ID: "test-dev-guild",
-    NODE_ENV: "test",
-    isDev: false,
-    isProd: false,
-    roleId: "1292528573881651372",
-    channelId: "1383977293579419769",
-  },
-}));
-
-// Mock environment variables
-// process.env.NODE_ENV = 'test';
-// process.env.DISCORD_TOKEN = 'test-token';
-// process.env.CLIENT_ID = 'test-client-id';
-// process.env.API_PORT = '3000';
-// process.env.BOT_TOKEN = 'test-bot-token';
-// process.env.UNSPLASH_ACCESS_KEY = 'test-unsplash-key';
-// process.env.STREAM_URL = 'test-stream-url';
-// process.env.JSON_URL = 'test-json-url';
-// process.env.ADMIN_ROLE_ID = 'test-admin-role';
-// process.env.VOICE_CHANNEL_ID = 'test-voice-channel';
-// process.env.PLAYLIST_CHANNEL_ID = 'test-playlist-channel';
-// process.env.API_TOKEN = 'test-api-token';
-// process.env.BOT_ROLE_NAME = 'soundSHINE';
-// process.env.DEV_GUILD_ID = 'test-dev-guild';
